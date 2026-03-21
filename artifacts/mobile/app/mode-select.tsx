@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -31,7 +30,7 @@ export default function ModeSelectScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color={Colors.textMuted} />
+        <Text style={styles.backBtnText}>← Back</Text>
       </TouchableOpacity>
 
       <View style={styles.header}>
@@ -61,9 +60,8 @@ export default function ModeSelectScreen() {
       </View>
 
       <View style={styles.infoCard}>
-        <Ionicons name="sparkles-outline" size={18} color={Colors.gold} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.infoTitle}>Spaced Repetition</Text>
+          <Text style={styles.infoTitle}>✦ Spaced Repetition</Text>
           <Text style={styles.infoText}>
             Words you get wrong appear more often. Master the ones you struggle with first.
           </Text>
@@ -72,7 +70,6 @@ export default function ModeSelectScreen() {
 
       <TouchableOpacity style={styles.startBtn} onPress={handleStart} activeOpacity={0.85}>
         <Text style={styles.startBtnText}>Start 10-Question Round</Text>
-        <Ionicons name="play" size={20} color={Colors.white} />
       </TouchableOpacity>
     </View>
   );
@@ -107,7 +104,7 @@ function ModeCard({
             <Text style={styles.flagText}>{fromFlag}</Text>
             <Text style={styles.langText}>{fromLang}</Text>
           </View>
-          <Ionicons name="arrow-forward" size={18} color={selected ? Colors.accentBlue : Colors.textMuted} />
+          <Text style={[styles.arrowText, selected && styles.arrowTextSelected]}>→</Text>
           <View style={styles.langPill}>
             <Text style={styles.flagText}>{toFlag}</Text>
             <Text style={styles.langText}>{toLang}</Text>
@@ -117,7 +114,7 @@ function ModeCard({
       </View>
       {selected && (
         <View style={styles.checkmark}>
-          <Ionicons name="checkmark-circle" size={22} color={Colors.accentBlue} />
+          <Text style={styles.checkmarkText}>✓</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -132,12 +129,14 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     marginBottom: 16,
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.navyCard,
-    borderRadius: 12,
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  backBtnText: {
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
+    color: Colors.textMuted,
   },
   header: {
     marginBottom: 28,
@@ -196,6 +195,14 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     color: Colors.white,
   },
+  arrowText: {
+    fontSize: 18,
+    color: Colors.textMuted,
+    fontFamily: "Inter_400Regular",
+  },
+  arrowTextSelected: {
+    color: Colors.accentBlue,
+  },
   modeDesc: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
@@ -207,6 +214,17 @@ const styles = StyleSheet.create({
   },
   checkmark: {
     marginLeft: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.accentBlue,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkmarkText: {
+    fontSize: 16,
+    color: Colors.white,
+    fontFamily: "Inter_700Bold",
   },
   infoCard: {
     backgroundColor: "rgba(255, 209, 102, 0.08)",

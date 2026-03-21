@@ -8,7 +8,6 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -66,7 +65,7 @@ export default function ResultsScreen() {
       >
         <View style={styles.header}>
           <TouchableOpacity style={styles.homeBtn} onPress={handleHome}>
-            <Ionicons name="home-outline" size={20} color={Colors.textMuted} />
+            <Text style={styles.homeBtnText}>⌂ Home</Text>
           </TouchableOpacity>
         </View>
 
@@ -80,19 +79,19 @@ export default function ResultsScreen() {
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Ionicons name="checkmark-circle" size={24} color={Colors.correctGreen} />
+              <Text style={[styles.statMark, { color: Colors.correctGreen }]}>✓</Text>
               <Text style={styles.statNum}>{correctCount}</Text>
               <Text style={styles.statLabel}>Correct</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Ionicons name="close-circle" size={24} color={Colors.wrongRed} />
+              <Text style={[styles.statMark, { color: Colors.wrongRed }]}>✕</Text>
               <Text style={styles.statNum}>{wrongCount}</Text>
               <Text style={styles.statLabel}>Wrong</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Ionicons name="list-outline" size={24} color={Colors.accentBlue} />
+              <Text style={[styles.statMark, { color: Colors.accentBlue }]}>#</Text>
               <Text style={styles.statNum}>{total}</Text>
               <Text style={styles.statLabel}>Total</Text>
             </View>
@@ -102,8 +101,7 @@ export default function ResultsScreen() {
         {wrongInRound.length > 0 && (
           <View style={styles.wrongSection}>
             <Text style={styles.wrongTitle}>
-              <Ionicons name="warning-outline" size={15} color={Colors.wrongRed} />
-              {" "}{wrongInRound.length} Sentence{wrongInRound.length > 1 ? "s" : ""} to Review
+              {wrongInRound.length} Sentence{wrongInRound.length > 1 ? "s" : ""} to Review
             </Text>
             {wrongInRound.map((pair) => (
               <View key={pair.english} style={styles.wrongCard}>
@@ -117,18 +115,15 @@ export default function ResultsScreen() {
         <View style={styles.actionsSection}>
           {wrongInRound.length > 0 && (
             <TouchableOpacity style={styles.retryBtn} onPress={handleRetryWeak} activeOpacity={0.85}>
-              <Ionicons name="refresh-outline" size={20} color={Colors.wrongRed} />
               <Text style={styles.retryBtnText}>Retry Weak Words ({wrongInRound.length})</Text>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity style={styles.newRoundBtn} onPress={handleNewRound} activeOpacity={0.85}>
-            <Ionicons name="play-outline" size={20} color={Colors.white} />
             <Text style={styles.newRoundBtnText}>New Round</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.modeBtn} onPress={handleChangeMode} activeOpacity={0.85}>
-            <Ionicons name="swap-horizontal-outline" size={20} color={Colors.accentBlue} />
             <Text style={styles.modeBtnText}>Change Mode</Text>
           </TouchableOpacity>
         </View>
@@ -154,12 +149,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   homeBtn: {
-    width: 44,
-    height: 44,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
     backgroundColor: Colors.navyCard,
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  homeBtnText: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: Colors.textMuted,
   },
   scoreCard: {
     backgroundColor: Colors.navyCard,
@@ -215,6 +213,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     gap: 4,
+  },
+  statMark: {
+    fontSize: 22,
+    fontFamily: "Inter_700Bold",
+    lineHeight: 28,
   },
   statDivider: {
     width: 1,

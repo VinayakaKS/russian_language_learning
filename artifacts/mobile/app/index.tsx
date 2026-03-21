@@ -8,7 +8,6 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -50,7 +49,7 @@ export default function HomeScreen() {
     >
       <View style={styles.brandRow}>
         <View style={styles.logoCircle}>
-          <Ionicons name="language" size={28} color={Colors.white} />
+          <Text style={styles.logoText}>RU</Text>
         </View>
         <View>
           <Text style={styles.appName}>Russian Learner</Text>
@@ -61,24 +60,9 @@ export default function HomeScreen() {
       {allSentences.length > 0 ? (
         <>
           <View style={styles.statsGrid}>
-            <StatCard
-              icon="library-outline"
-              value={allSentences.length.toString()}
-              label="Sentences"
-              color={Colors.accentBlue}
-            />
-            <StatCard
-              icon="school-outline"
-              value={totalStudied.toString()}
-              label="Studied"
-              color={Colors.gold}
-            />
-            <StatCard
-              icon="trophy-outline"
-              value={`${overallAccuracy}%`}
-              label="Accuracy"
-              color={Colors.correctGreen}
-            />
+            <StatCard value={allSentences.length.toString()} label="Sentences" color={Colors.accentBlue} />
+            <StatCard value={totalStudied.toString()} label="Studied" color={Colors.gold} />
+            <StatCard value={`${overallAccuracy}%`} label="Accuracy" color={Colors.correctGreen} />
           </View>
 
           <TouchableOpacity
@@ -89,7 +73,6 @@ export default function HomeScreen() {
             }}
             activeOpacity={0.85}
           >
-            <Ionicons name="play" size={22} color={Colors.white} />
             <Text style={styles.primaryBtnText}>Start Quiz</Text>
           </TouchableOpacity>
 
@@ -99,7 +82,6 @@ export default function HomeScreen() {
               onPress={() => router.push("/upload")}
               activeOpacity={0.85}
             >
-              <Ionicons name="cloud-upload-outline" size={18} color={Colors.accentBlue} />
               <Text style={styles.secondaryBtnText}>Replace Vocabulary</Text>
             </TouchableOpacity>
           </View>
@@ -107,17 +89,14 @@ export default function HomeScreen() {
           <View style={styles.featuresSection}>
             <Text style={styles.featuresTitle}>How It Works</Text>
             <FeatureRow
-              icon="volume-medium-outline"
               title="Audio-First Learning"
               desc="Auto-plays TTS for every sentence, tap speaker icons to replay"
             />
             <FeatureRow
-              icon="shuffle-outline"
               title="Spaced Repetition"
               desc="Difficult words appear more often until you master them"
             />
             <FeatureRow
-              icon="bar-chart-outline"
               title="Progress Tracking"
               desc="Track accuracy and review sentences you struggled with"
             />
@@ -126,7 +105,7 @@ export default function HomeScreen() {
       ) : (
         <View style={styles.emptyState}>
           <View style={styles.emptyIcon}>
-            <Ionicons name="document-text-outline" size={48} color={Colors.accentBlue} />
+            <Text style={styles.emptyIconText}>📂</Text>
           </View>
           <Text style={styles.emptyTitle}>No Vocabulary Yet</Text>
           <Text style={styles.emptyDesc}>
@@ -140,26 +119,13 @@ export default function HomeScreen() {
             }}
             activeOpacity={0.85}
           >
-            <Ionicons name="cloud-upload-outline" size={20} color={Colors.white} />
             <Text style={styles.primaryBtnText}>Import Vocabulary</Text>
           </TouchableOpacity>
 
           <View style={styles.featuresSection}>
-            <FeatureRow
-              icon="volume-medium-outline"
-              title="Audio-First Learning"
-              desc="Hear every word spoken in native Russian"
-            />
-            <FeatureRow
-              icon="shuffle-outline"
-              title="Spaced Repetition"
-              desc="Focus on words you haven't mastered yet"
-            />
-            <FeatureRow
-              icon="checkmark-circle-outline"
-              title="Multiple Choice Quiz"
-              desc="4 options per question, instant audio feedback"
-            />
+            <FeatureRow title="Audio-First Learning" desc="Hear every word spoken in native Russian" />
+            <FeatureRow title="Spaced Repetition" desc="Focus on words you haven't mastered yet" />
+            <FeatureRow title="Multiple Choice Quiz" desc="4 options per question, instant audio feedback" />
           </View>
         </View>
       )}
@@ -167,22 +133,18 @@ export default function HomeScreen() {
   );
 }
 
-function StatCard({ icon, value, label, color }: { icon: string; value: string; label: string; color: string }) {
+function StatCard({ value, label, color }: { value: string; label: string; color: string }) {
   return (
     <View style={[styles.statCard, { borderColor: color + "22" }]}>
-      <Ionicons name={icon as any} size={20} color={color} style={{ marginBottom: 6 }} />
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
-function FeatureRow({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+function FeatureRow({ title, desc }: { title: string; desc: string }) {
   return (
     <View style={styles.featureRow}>
-      <View style={styles.featureIcon}>
-        <Ionicons name={icon as any} size={20} color={Colors.accentBlue} />
-      </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.featureTitle}>{title}</Text>
         <Text style={styles.featureDesc}>{desc}</Text>
@@ -215,6 +177,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  logoText: {
+    fontSize: 20,
+    fontFamily: "Inter_700Bold",
+    color: Colors.white,
+  },
   appName: {
     fontSize: 22,
     fontFamily: "Inter_700Bold",
@@ -243,6 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Inter_700Bold",
     lineHeight: 24,
+    marginBottom: 6,
   },
   statLabel: {
     fontSize: 11,
@@ -304,14 +272,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
   },
-  featureIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(41, 82, 255, 0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   featureTitle: {
     fontSize: 14,
     fontFamily: "Inter_600SemiBold",
@@ -336,6 +296,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center",
     marginBottom: 20,
+  },
+  emptyIconText: {
+    fontSize: 40,
   },
   emptyTitle: {
     fontSize: 24,

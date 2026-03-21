@@ -9,7 +9,6 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -71,7 +70,7 @@ export default function UploadScreen() {
 
       <View style={styles.uploadArea}>
         <View style={styles.iconBg}>
-          <Ionicons name="cloud-upload-outline" size={52} color={Colors.accentBlue} />
+          <Text style={styles.uploadEmoji}>📤</Text>
         </View>
         <Text style={styles.uploadTitle}>Import Vocabulary</Text>
         <Text style={styles.uploadHint}>
@@ -87,17 +86,13 @@ export default function UploadScreen() {
           {loading ? (
             <ActivityIndicator color={Colors.white} size="small" />
           ) : (
-            <>
-              <Ionicons name="document-text-outline" size={20} color={Colors.white} />
-              <Text style={styles.pickBtnText}>Choose File</Text>
-            </>
+            <Text style={styles.pickBtnText}>Choose File</Text>
           )}
         </TouchableOpacity>
 
         {parsedCount !== null && (
           <View style={styles.successBadge}>
-            <Ionicons name="checkmark-circle" size={20} color={Colors.correctGreen} />
-            <Text style={styles.successText}>{parsedCount} sentences loaded</Text>
+            <Text style={styles.successText}>✓ {parsedCount} sentences loaded</Text>
             {fileName && <Text style={styles.fileNameText}>{fileName}</Text>}
           </View>
         )}
@@ -134,7 +129,6 @@ export default function UploadScreen() {
       {parsedCount !== null && (
         <TouchableOpacity style={styles.startBtn} onPress={handleStart} activeOpacity={0.85}>
           <Text style={styles.startBtnText}>Continue to Quiz</Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.white} />
         </TouchableOpacity>
       )}
     </View>
@@ -179,6 +173,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 20,
   },
+  uploadEmoji: {
+    fontSize: 40,
+  },
   uploadTitle: {
     fontSize: 20,
     fontFamily: "Inter_700Bold",
@@ -201,6 +198,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     borderRadius: 14,
     gap: 8,
+    minWidth: 140,
+    justifyContent: "center",
   },
   pickBtnDisabled: {
     opacity: 0.7,

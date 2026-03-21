@@ -9,7 +9,6 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,7 +38,6 @@ export default function QuizScreen() {
 
   const currentQuestion = currentRound[currentIndex];
   const totalQuestions = currentRound.length;
-  const progress = totalQuestions > 0 ? (currentIndex) / totalQuestions : 0;
 
   const promptText = currentQuestion
     ? mode === "englishToRussian"
@@ -132,7 +130,7 @@ export default function QuizScreen() {
     <View style={[styles.container, { paddingTop: insets.top + 12 + webTopPadding, paddingBottom: insets.bottom + 20 }]}>
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.exitBtn} onPress={handleExit}>
-          <Ionicons name="close" size={22} color={Colors.textMuted} />
+          <Text style={styles.exitBtnText}>✕</Text>
         </TouchableOpacity>
         <ProgressBar progress={(currentIndex + (isAnswered ? 1 : 0)) / totalQuestions} />
         <Text style={styles.counter}>{currentIndex + 1} / {totalQuestions}</Text>
@@ -165,7 +163,7 @@ export default function QuizScreen() {
 
         <View style={styles.optionsSection}>
           <Text style={styles.optionsLabel}>Choose the correct answer</Text>
-          {options.map((pair, idx) => (
+          {options.map((pair) => (
             <OptionCard
               key={pair.english}
               pair={pair}
@@ -182,7 +180,6 @@ export default function QuizScreen() {
             <Text style={styles.nextBtnText}>
               {currentIndex + 1 >= totalQuestions ? "See Results" : "Next"}
             </Text>
-            <Ionicons name="arrow-forward" size={20} color={Colors.white} />
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -209,6 +206,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.navyCard,
     alignItems: "center",
     justifyContent: "center",
+  },
+  exitBtnText: {
+    fontSize: 16,
+    color: Colors.textMuted,
+    fontFamily: "Inter_500Medium",
   },
   counter: {
     fontSize: 14,
