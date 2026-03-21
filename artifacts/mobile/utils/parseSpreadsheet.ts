@@ -1,19 +1,25 @@
 import * as FileSystem from "expo-file-system";
 import { SentencePair } from "@/models/SentencePair";
+// @ts-ignore – pako has no bundled types but works fine in RN
+import pako from "pako";
 
 export async function parseSpreadsheet(uri: string, name: string): Promise<SentencePair[]> {
-  const lowerName = name.toLowerCase();
+  const lowerName = (name || "").toLowerCase();
 
   if (lowerName.endsWith(".csv")) {
     return parseCSV(uri);
   } else if (lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls")) {
     return parseXLSX(uri);
   }
-  throw new Error("Unsupported file format. Please use .xlsx or .csv");
+  // Try CSV as a fallback for unknown extensions
+  return parseCSV(uri);
 }
 
+// ─── CSV ─────────────────────────────────────────────────────────────────────
+
 async function parseCSV(uri: string): Promise<SentencePair[]> {
-  const content = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.UTF8 });
+  // Use "utf8" string literal — EncodingType enum is unavailable in some versions
+  const content = await FileSystem.readAsStringAsync(uri, { encoding: "utf8" as any });
   const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
   const pairs: SentencePair[] = [];
 
@@ -51,33 +57,26 @@ function parseCSVLine(line: string): string[] {
   return result;
 }
 
+// ─── XLSX ────────────────────────────────────────────────────────────────────
+
 async function parseXLSX(uri: string): Promise<SentencePair[]> {
-  try {
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+  // Read as base64
+  const base64 = await FileSystem.readAsStringAsync(uri, { encoding: "base64" as any });
 
-    const binaryStr = atob(base64);
-    const bytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-      bytes[i] = binaryStr.charCodeAt(i);
-    }
-
-    const pairs = await extractXLSXPairs(bytes);
-    return pairs;
-  } catch (err) {
-    throw new Error("Failed to parse XLSX file. Please try a CSV file instead.");
+  // Decode base64 → Uint8Array
+  const binaryStr = atob(base64);
+  const bytes = new Uint8Array(binaryStr.length);
+  for (let i = 0; i < binaryStr.length; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
   }
-}
 
-async function extractXLSXPairs(bytes: Uint8Array): Promise<SentencePair[]> {
-  const zip = await unzipXLSX(bytes);
+  const zip = unzipXLSX(bytes);
 
   const sharedStringsXML = zip["xl/sharedStrings.xml"];
   const sheetXML = zip["xl/worksheets/sheet1.xml"];
 
   if (!sheetXML) {
-    throw new Error("Could not find sheet data in XLSX file.");
+    throw new Error("Could not find sheet data in XLSX. Please save as CSV and try again.");
   }
 
   const sharedStrings = sharedStringsXML ? parseSharedStrings(sharedStringsXML) : [];
@@ -92,17 +91,28 @@ async function extractXLSXPairs(bytes: Uint8Array): Promise<SentencePair[]> {
   return pairs;
 }
 
-async function unzipXLSX(bytes: Uint8Array): Promise<Record<string, string>> {
+// Synchronous XLSX unzip using pako for deflate decompression
+function unzipXLSX(bytes: Uint8Array): Record<string, string> {
   const files: Record<string, string> = {};
+  const targets = new Set(["xl/sharedStrings.xml", "xl/worksheets/sheet1.xml"]);
 
   let offset = 0;
-  while (offset < bytes.length - 4) {
-    const sig = (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
-    if (sig !== 0x04034b50) break;
+  while (offset + 30 < bytes.length) {
+    // Local file header signature = 0x04034b50
+    const sig =
+      bytes[offset] |
+      (bytes[offset + 1] << 8) |
+      (bytes[offset + 2] << 16) |
+      (bytes[offset + 3] << 24);
+
+    if ((sig >>> 0) !== 0x04034b50) break;
 
     const compression = bytes[offset + 8] | (bytes[offset + 9] << 8);
-    const compressedSize = bytes[offset + 18] | (bytes[offset + 19] << 8) | (bytes[offset + 20] << 16) | (bytes[offset + 21] << 24);
-    const uncompressedSize = bytes[offset + 22] | (bytes[offset + 23] << 8) | (bytes[offset + 24] << 16) | (bytes[offset + 25] << 24);
+    const compressedSize =
+      bytes[offset + 18] |
+      (bytes[offset + 19] << 8) |
+      (bytes[offset + 20] << 16) |
+      (bytes[offset + 21] << 24);
     const fileNameLength = bytes[offset + 26] | (bytes[offset + 27] << 8);
     const extraLength = bytes[offset + 28] | (bytes[offset + 29] << 8);
 
@@ -111,37 +121,21 @@ async function unzipXLSX(bytes: Uint8Array): Promise<Record<string, string>> {
     const dataStart = offset + 30 + fileNameLength + extraLength;
     const compressedData = bytes.slice(dataStart, dataStart + compressedSize);
 
-    const targetNames = ["xl/sharedStrings.xml", "xl/worksheets/sheet1.xml"];
-    if (targetNames.includes(fileName)) {
+    if (targets.has(fileName)) {
+      let text = "";
       if (compression === 0) {
-        files[fileName] = new TextDecoder("utf-8").decode(compressedData);
+        // Stored (no compression)
+        text = new TextDecoder("utf-8").decode(compressedData);
       } else if (compression === 8) {
+        // Deflate — use pako
         try {
-          const ds = new DecompressionStream("deflate-raw");
-          const writer = ds.writable.getWriter();
-          const reader = ds.readable.getReader();
-          writer.write(compressedData);
-          writer.close();
-
-          const chunks: Uint8Array[] = [];
-          let done = false;
-          while (!done) {
-            const { value, done: d } = await reader.read();
-            if (value) chunks.push(value);
-            done = d;
-          }
-          const total = chunks.reduce((acc, c) => acc + c.length, 0);
-          const result = new Uint8Array(total);
-          let pos = 0;
-          for (const chunk of chunks) {
-            result.set(chunk, pos);
-            pos += chunk.length;
-          }
-          files[fileName] = new TextDecoder("utf-8").decode(result);
-        } catch {
-          // skip if decompression fails
+          const decompressed = pako.inflateRaw(compressedData);
+          text = new TextDecoder("utf-8").decode(decompressed);
+        } catch (e) {
+          // Skip files that fail to decompress
         }
       }
+      if (text) files[fileName] = text;
     }
 
     offset = dataStart + compressedSize;
@@ -149,6 +143,8 @@ async function unzipXLSX(bytes: Uint8Array): Promise<Record<string, string>> {
 
   return files;
 }
+
+// ─── XML parsers ──────────────────────────────────────────────────────────────
 
 function parseSharedStrings(xml: string): string[] {
   const strings: string[] = [];
@@ -172,7 +168,8 @@ function parseSharedStrings(xml: string): string[] {
 function parseSheet(xml: string, sharedStrings: string[]): string[][] {
   const rows: string[][] = [];
   const rowRegex = /<row[^>]*>([\s\S]*?)<\/row>/g;
-  const cellRegex = /<c\s[^>]*r="([A-Z]+)(\d+)"[^>]*(?:t="([^"]*)")?[^>]*>(?:<v>([\s\S]*?)<\/v>)?(?:<is><t>([\s\S]*?)<\/t><\/is>)?<\/c>/g;
+  const cellRegex =
+    /<c\s[^>]*r="([A-Z]+)\d+"[^>]*(?:t="([^"]*)")?[^>]*>(?:(?:<v>([\s\S]*?)<\/v>)|(?:<is><t>([\s\S]*?)<\/t><\/is>))?<\/c>/g;
 
   let rowMatch;
   while ((rowMatch = rowRegex.exec(xml)) !== null) {
@@ -183,9 +180,9 @@ function parseSheet(xml: string, sharedStrings: string[]): string[][] {
     cellRegex.lastIndex = 0;
     while ((cellMatch = cellRegex.exec(rowContent)) !== null) {
       const col = cellMatch[1];
-      const type = cellMatch[3];
-      const val = cellMatch[4];
-      const inlineStr = cellMatch[5];
+      const type = cellMatch[2];
+      const val = cellMatch[3];
+      const inlineStr = cellMatch[4];
 
       let cellValue = "";
       if (inlineStr !== undefined) {
