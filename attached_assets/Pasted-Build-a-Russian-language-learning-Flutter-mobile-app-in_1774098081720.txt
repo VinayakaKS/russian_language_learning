@@ -1,0 +1,163 @@
+Build a Russian language learning Flutter mobile app inspired by Pimsleur's 
+audio-first, spoken-language methodology. Target platform is Android. 
+Build for Flutter 3.x, tested on Ubuntu Linux.
+
+---
+
+## PACKAGES (pubspec.yaml)
+dependencies:
+  flutter:
+    sdk: flutter
+  excel: ^4.0.0          # Parse .xlsx files
+  file_picker: ^6.0.0    # File upload screen
+  flutter_tts: ^4.0.0    # Text-to-speech (Russian + English)
+  provider: ^6.0.0       # State management
+  shared_preferences: ^2.0.0  # Persist per-sentence stats across sessions
+
+---
+
+## CORE FEATURE: Excel Upload
+- On first launch, show an upload screen.
+- User picks an .xlsx or .csv file using file_picker.
+- Parse with the excel package. Sheet has two columns:
+  - Column A: English sentence
+  - Column B: Russian sentence (Cyrillic)
+- Store all parsed sentence pairs in a Provider state object.
+- After successful parse, navigate to Mode Select screen.
+- Persist the loaded sentences in shared_preferences so the user 
+  doesn't have to re-upload every session.
+
+---
+
+## QUIZ MODES
+User selects one before starting:
+1. English → Russian: show English prompt, 4 Russian options
+2. Russian → English: show Russian (Cyrillic) prompt, 4 English options
+
+---
+
+## QUESTION GENERATION (Spaced Repetition)
+- Track per-sentence stats using shared_preferences:
+  - timesCorrect (int)
+  - timesWrong (int)
+  - lastAnsweredCorrectly (bool)
+- Weighted random selection logic:
+  - Never seen: medium weight (weight = 3)
+  - Wrong recently: high weight (weight = 5)
+  - Correct 3+ times in a row: low weight (weight = 1)
+- Each round = exactly 10 questions selected by weighted priority.
+- Never repeat the same question twice in a row.
+- Show question counter top right: "1 / 10"
+
+---
+
+## QUIZ SCREEN UI
+- Dark navy background (#0D1B3E)
+- Top bar: X button (exit round) on left, question counter "1/10" on right
+- Prompt sentence centered, large bold text, with a speaker IconButton 
+  to replay TTS audio. Auto-play TTS when question loads.
+- 4 answer option Cards below, each with:
+  - Speaker IconButton on left → plays that option's TTS
+  - Sentence text on right
+- Cards are white with rounded corners, slight elevation shadow
+- On option tap:
+  - Correct: card animates to GREEN, play short success sound
+  - Wrong: selected card animates to RED, correct card animates to GREEN
+  - Then reveal below each card its translation (the other language)
+  - Show a "Next →" button to proceed
+- Smooth slide transition between questions (PageRouteBuilder)
+
+---
+
+## AUDIO (flutter_tts)
+- Russian sentences: language = "ru-RU"
+- English sentences: language = "en-US"
+- Speaker icon on prompt plays the prompt sentence
+- Speaker icon on each option card plays that option's sentence
+- Auto-play the prompt sentence when a new question loads
+- Add a small delay (300ms) before auto-play so the screen renders first
+
+---
+
+## PROGRESS TRACKING
+- Persistent top LinearProgressIndicator that fills across the 10 questions
+- Track globally per session: correct count, wrong count, accuracy %
+- After 10 questions → Results Screen:
+  - Show accuracy % (large, bold)
+  - List of sentences answered wrong with their correct translations
+  - Two buttons:
+    - "Retry Weak Words" → new round using only wrong sentences
+    - "New Round" → fresh 10-question round with full weighted selection
+
+---
+
+## KEYBOARD / INTERACTION
+- Physical keyboard shortcuts (useful when testing on emulator or desktop):
+  - Keys 1/2/3/4 → select corresponding option
+  - Enter → confirm or go to next question
+  - Space → replay prompt audio
+
+---
+
+## APP SCREENS SUMMARY
+1. Upload Screen — file picker, parse Excel, show sentence count on success
+2. Mode Select Screen — EN→RU or RU→EN toggle, "Start" button
+3. Quiz Screen — prompt + 4 option cards + progress bar + speaker icons
+4. Answer Reveal — color feedback + translations shown under all 4 cards + Next button
+5. Results Screen — accuracy, wrong sentences list, Retry / New Round buttons
+
+---
+
+## STATE MANAGEMENT
+- Use Provider with a single QuizState ChangeNotifier class containing:
+  - List<SentencePair> allSentences
+  - Map<String, SentenceStats> statsMap (keyed by English sentence)
+  - List<SentencePair> currentRound (10 sentences)
+  - int currentIndex
+  - int correctCount, wrongCount
+  - QuizMode mode (enum: englishToRussian, russianToEnglish)
+- QuizState handles question selection, stat updates, and round generation
+
+---
+
+## VISUAL DESIGN
+- Color palette:
+  - Background: #0D1B3E (deep navy)
+  - Primary accent: #2952FF (vibrant blue)
+  - Correct: #2ECC71 (green)
+  - Wrong: #E74C3C (red)
+  - Card background: #FFFFFF
+  - Gold accent: #FFD166 (for results screen highlights)
+- Typography:
+  - UI text: Google Fonts Montserrat (Bold for prompts, Regular for body)
+  - Cyrillic text: Google Fonts Noto Serif (ensures clean Cyrillic rendering)
+- Mobile-first, single column layout
+- Smooth AnimatedContainer for card color transitions (300ms)
+- SlideTransition between quiz questions
+
+---
+
+## FOLDER STRUCTURE
+lib/
+  main.dart
+  models/
+    sentence_pair.dart
+    sentence_stats.dart
+    quiz_mode.dart
+  providers/
+    quiz_state.dart
+  screens/
+    upload_screen.dart
+    mode_select_screen.dart
+    quiz_screen.dart
+    results_screen.dart
+  widgets/
+    option_card.dart
+    speaker_button.dart
+    progress_bar.dart
+
+---
+
+Scaffold the full project structure first, then implement screens one by one 
+starting with: QuizState provider → Upload Screen → Mode Select → Quiz Screen 
+→ Results Screen.
