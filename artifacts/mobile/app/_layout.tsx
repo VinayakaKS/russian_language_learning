@@ -5,13 +5,14 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { QuizProvider } from "@/context/QuizContext";
@@ -26,18 +27,8 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="upload" />
       <Stack.Screen name="mode-select" />
-      <Stack.Screen
-        name="quiz"
-        options={{
-          animation: "slide_from_right",
-        }}
-      />
-      <Stack.Screen
-        name="results"
-        options={{
-          animation: "slide_from_right",
-        }}
-      />
+      <Stack.Screen name="quiz" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="results" options={{ animation: "slide_from_right" }} />
     </Stack>
   );
 }
@@ -48,6 +39,9 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    // Explicitly load vector icon fonts so they render on Android
+    ...Ionicons.font,
+    ...Feather.font,
   });
 
   useEffect(() => {
