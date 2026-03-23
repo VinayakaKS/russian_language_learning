@@ -28,6 +28,7 @@ function RootLayoutNav() {
       <Stack.Screen name="mode-select" />
       <Stack.Screen name="quiz" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="results" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="manual-entry" options={{ animation: "slide_from_right" }} />
     </Stack>
   );
 }

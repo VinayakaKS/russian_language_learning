@@ -84,6 +84,13 @@ export default function HomeScreen() {
             >
               <Text style={styles.secondaryBtnText}>Replace Vocabulary</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.secondaryBtn, { marginTop: 10 }]}
+              onPress={() => router.push("/manual-entry")}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.secondaryBtnText}>Add More Sentences</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.featuresSection}>
