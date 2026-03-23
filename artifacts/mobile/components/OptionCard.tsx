@@ -36,10 +36,22 @@ const TEXT_COLORS: Record<OptionState, string> = {
 export function OptionCard({ pair, mode, state, onPress, showTranslation }: OptionCardProps) {
   const bgAnim = useRef(new Animated.Value(0)).current;
 
+  // What the user sees as the main option text
   const displayText = mode === "englishToRussian" ? pair.russian : pair.english;
+
+  // The revealed translation shown after answering
   const translationText = mode === "englishToRussian" ? pair.english : pair.russian;
-  const speechLang = mode === "englishToRussian" ? "ru-RU" : "en-US";
-  const speechText = mode === "englishToRussian" ? pair.russian : pair.english;
+
+  // Speaker always reads RUSSIAN:
+  // - englishToRussian mode: options show Russian → speak Russian immediately
+  // - russianToEnglish mode: options show English → speak Russian only after the Russian is revealed
+  const speakerText = pair.russian;
+  const speakerLang = "ru-RU" as const;
+
+  // Show speaker:
+  // - englishToRussian: always (options are Russian)
+  // - russianToEnglish: only after answering (when Russian translation is revealed)
+  const showSpeaker = mode === "englishToRussian" || showTranslation;
 
   useEffect(() => {
     Animated.timing(bgAnim, {
@@ -65,15 +77,17 @@ export function OptionCard({ pair, mode, state, onPress, showTranslation }: Opti
         activeOpacity={0.85}
         style={styles.inner}
       >
-        <View style={styles.leftIcon}>
-          <SpeakerButton
-            text={speechText}
-            language={speechLang}
-            size={18}
-            color={state === "default" ? Colors.accentBlue : "rgba(255,255,255,0.85)"}
-          />
-        </View>
-        <View style={styles.textContainer}>
+        {showSpeaker && (
+          <View style={styles.leftIcon}>
+            <SpeakerButton
+              text={speakerText}
+              language={speakerLang}
+              size={18}
+              color={state === "default" ? Colors.accentBlue : "rgba(255,255,255,0.85)"}
+            />
+          </View>
+        )}
+        <View style={[styles.textContainer, !showSpeaker && styles.textContainerFull]}>
           <Text style={[styles.optionText, { color: textColor }]}>{displayText}</Text>
           {showTranslation && (
             <Text style={[styles.translationText, { color: state === "default" ? Colors.textMuted : "rgba(255,255,255,0.75)" }]}>
@@ -108,6 +122,9 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     gap: 4,
+  },
+  textContainerFull: {
+    marginLeft: 0,
   },
   optionText: {
     fontSize: 16,

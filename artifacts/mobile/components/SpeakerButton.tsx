@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, ActivityIndicator, StyleSheet, Text } from "react-native";
 import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
@@ -37,7 +36,7 @@ export function SpeakerButton({ text, language, size = 22, color = Colors.accent
       {speaking ? (
         <ActivityIndicator size="small" color={color} />
       ) : (
-        <Ionicons name="volume-medium" size={size} color={color} />
+        <Text style={[styles.icon, { color, fontSize: size }]}>♪</Text>
       )}
     </TouchableOpacity>
   );
@@ -49,5 +48,9 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: "center",
     justifyContent: "center",
+  },
+  icon: {
+    fontFamily: "Inter_700Bold",
+    lineHeight: 36,
   },
 });
