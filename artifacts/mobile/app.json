@@ -16,7 +16,9 @@
     "ios": {
       "supportsTablet": false
     },
-    "android": {},
+    "android": {
+      "package": "com.vinayakaksgupta.mobile"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
@@ -33,6 +35,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5180b6ea-cef6-472c-8d64-8896bd1ba63c"
+      }
     }
   }
 }
