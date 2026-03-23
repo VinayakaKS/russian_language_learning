@@ -79,10 +79,10 @@ export default function HomeScreen() {
           <View style={styles.secondaryActions}>
             <TouchableOpacity
               style={styles.secondaryBtn}
-              onPress={() => router.push("/upload")}
+              onPress={() => router.push("/vocab")}
               activeOpacity={0.85}
             >
-              <Text style={styles.secondaryBtnText}>Replace Vocabulary</Text>
+              <Text style={styles.secondaryBtnText}>View All Vocabulary</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.secondaryBtn, { marginTop: 10 }]}
@@ -90,6 +90,13 @@ export default function HomeScreen() {
               activeOpacity={0.85}
             >
               <Text style={styles.secondaryBtnText}>Add More Sentences</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.secondaryBtn, { marginTop: 10 }]}
+              onPress={() => router.push("/upload")}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.secondaryBtnText}>Import from File</Text>
             </TouchableOpacity>
           </View>
 

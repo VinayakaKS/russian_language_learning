@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
 import React, { createContext, useCallback, useContext, useRef, useState } from "react";
 import { SentencePair } from "@/models/SentencePair";
 import { SentenceStats, defaultStats } from "@/models/SentenceStats";
@@ -6,7 +7,69 @@ import { QuizMode } from "@/models/QuizMode";
 
 const SENTENCES_KEY = "quiz_sentences_v2";
 const STATS_KEY = "quiz_stats_v2";
+const VOCAB_FILE = (FileSystem.documentDirectory ?? "") + "vocab.json";
+const STATS_FILE = (FileSystem.documentDirectory ?? "") + "stats.json";
 const ROUND_SIZE = 10;
+
+// ─── File helpers ─────────────────────────────────────────────────────────────
+
+async function writeFile(path: string, data: unknown) {
+  try {
+    await FileSystem.writeAsStringAsync(path, JSON.stringify(data), { encoding: "utf8" as any });
+  } catch {
+    // silently ignore write failures
+  }
+}
+
+async function readFile<T>(path: string): Promise<T | null> {
+  try {
+    const info = await FileSystem.getInfoAsync(path);
+    if (!info.exists) return null;
+    const content = await FileSystem.readAsStringAsync(path, { encoding: "utf8" as any });
+    return JSON.parse(content) as T;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Save both AsyncStorage and file ─────────────────────────────────────────
+
+async function saveSentences(pairs: SentencePair[]) {
+  await Promise.all([
+    AsyncStorage.setItem(SENTENCES_KEY, JSON.stringify(pairs)).catch(() => {}),
+    writeFile(VOCAB_FILE, pairs),
+  ]);
+}
+
+async function saveStats(stats: Record<string, SentenceStats>) {
+  await Promise.all([
+    AsyncStorage.setItem(STATS_KEY, JSON.stringify(stats)).catch(() => {}),
+    writeFile(STATS_FILE, stats),
+  ]);
+}
+
+async function loadSentencesFromStorage(): Promise<SentencePair[] | null> {
+  // Try AsyncStorage first (faster)
+  try {
+    const stored = await AsyncStorage.getItem(SENTENCES_KEY);
+    if (stored) {
+      const pairs: SentencePair[] = JSON.parse(stored);
+      if (pairs.length > 0) return pairs;
+    }
+  } catch {}
+  // Fall back to file
+  return readFile<SentencePair[]>(VOCAB_FILE);
+}
+
+async function loadStatsFromStorage(): Promise<Record<string, SentenceStats>> {
+  try {
+    const stored = await AsyncStorage.getItem(STATS_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return (await readFile<Record<string, SentenceStats>>(STATS_FILE)) ?? {};
+}
+
+// ─── Spaced repetition ────────────────────────────────────────────────────────
 
 function getWeight(stats: SentenceStats): number {
   if (stats.timesCorrect === 0 && stats.timesWrong === 0) return 3;
@@ -37,7 +100,6 @@ function buildRound(sentences: SentencePair[], statsMap: Record<string, Sentence
   const count = Math.min(ROUND_SIZE, sentences.length);
   const round: SentencePair[] = [];
   let lastEnglish: string | null = null;
-
   for (let i = 0; i < count; i++) {
     const chosen = weightedRandom(sentences, statsMap, lastEnglish);
     if (!chosen) break;
@@ -50,9 +112,10 @@ function buildRound(sentences: SentencePair[], statsMap: Record<string, Sentence
 function generateOptions(correct: SentencePair, allSentences: SentencePair[]): SentencePair[] {
   const others = allSentences.filter((s) => s.english !== correct.english);
   const shuffled = [...others].sort(() => Math.random() - 0.5).slice(0, 3);
-  const options = [...shuffled, correct].sort(() => Math.random() - 0.5);
-  return options;
+  return [...shuffled, correct].sort(() => Math.random() - 0.5);
 }
+
+// ─── Context ──────────────────────────────────────────────────────────────────
 
 interface QuizContextType {
   allSentences: SentencePair[];
@@ -69,6 +132,7 @@ interface QuizContextType {
 
   loadSentences: (pairs: SentencePair[]) => Promise<void>;
   loadFromStorage: () => Promise<boolean>;
+  deleteSentence: (english: string) => Promise<void>;
   setMode: (mode: QuizMode) => void;
   startRound: (fromWrong?: boolean) => void;
   selectAnswer: (answer: SentencePair) => void;
@@ -109,35 +173,27 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
 
   const loadSentences = useCallback(async (pairs: SentencePair[]) => {
     setAllSentences(pairs);
-    await AsyncStorage.setItem(SENTENCES_KEY, JSON.stringify(pairs));
-    try {
-      const stored = await AsyncStorage.getItem(STATS_KEY);
-      const existing: Record<string, SentenceStats> = stored ? JSON.parse(stored) : {};
-      setStatsMap(existing);
-    } catch {
-      setStatsMap({});
-    }
+    await saveSentences(pairs);
+    const existing = await loadStatsFromStorage();
+    setStatsMap(existing);
   }, []);
 
   const loadFromStorage = useCallback(async (): Promise<boolean> => {
-    try {
-      const stored = await AsyncStorage.getItem(SENTENCES_KEY);
-      if (!stored) return false;
-      const pairs: SentencePair[] = JSON.parse(stored);
-      if (pairs.length === 0) return false;
-      setAllSentences(pairs);
-      const statsStored = await AsyncStorage.getItem(STATS_KEY);
-      const existing: Record<string, SentenceStats> = statsStored ? JSON.parse(statsStored) : {};
-      setStatsMap(existing);
-      return true;
-    } catch {
-      return false;
-    }
+    const pairs = await loadSentencesFromStorage();
+    if (!pairs || pairs.length === 0) return false;
+    setAllSentences(pairs);
+    const stats = await loadStatsFromStorage();
+    setStatsMap(stats);
+    return true;
   }, []);
 
-  const setMode = useCallback((m: QuizMode) => {
-    setModeState(m);
+  const deleteSentence = useCallback(async (english: string) => {
+    const next = stateRef.current.allSentences.filter((s) => s.english !== english);
+    setAllSentences(next);
+    await saveSentences(next);
   }, []);
+
+  const setMode = useCallback((m: QuizMode) => setModeState(m), []);
 
   const startRound = useCallback((fromWrong = false) => {
     const { allSentences: sentences, wrongInRound: wrong, statsMap: stats } = stateRef.current;
@@ -158,7 +214,6 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
   const selectAnswer = useCallback((answer: SentencePair) => {
     const { isAnswered: alreadyAnswered, currentRound: round, currentIndex: idx, statsMap: stats, allSentences: sentences } = stateRef.current;
     if (alreadyAnswered) return;
-
     const correct = round[idx];
     if (!correct) return;
 
@@ -185,7 +240,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     };
     const nextStats = { ...stats, [correct.english]: updated };
     setStatsMap(nextStats);
-    AsyncStorage.setItem(STATS_KEY, JSON.stringify(nextStats));
+    saveStats(nextStats);
   }, []);
 
   const nextQuestion = useCallback(() => {
@@ -200,7 +255,11 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearData = useCallback(async () => {
-    await AsyncStorage.multiRemove([SENTENCES_KEY, STATS_KEY]);
+    await Promise.all([
+      AsyncStorage.multiRemove([SENTENCES_KEY, STATS_KEY]).catch(() => {}),
+      FileSystem.deleteAsync(VOCAB_FILE, { idempotent: true }).catch(() => {}),
+      FileSystem.deleteAsync(STATS_FILE, { idempotent: true }).catch(() => {}),
+    ]);
     setAllSentences([]);
     setStatsMap({});
     setCurrentRound([]);
@@ -221,6 +280,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     isAnswered,
     loadSentences,
     loadFromStorage,
+    deleteSentence,
     setMode,
     startRound,
     selectAnswer,
