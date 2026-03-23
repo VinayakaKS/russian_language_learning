@@ -1,22 +1,15 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useQuiz } from "@/context/QuizContext";
 
 export default function ResultsScreen() {
-  const { correctCount, wrongCount, wrongInRound, mode, startRound } = useQuiz();
+  const { correctCount, wrongCount, wrongInRound, startRound } = useQuiz();
   const insets = useSafeAreaInsets();
-
   const total = correctCount + wrongCount;
   const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
 
@@ -34,38 +27,18 @@ export default function ResultsScreen() {
     return "Don't give up! Review and retry!";
   };
 
-  const handleRetryWeak = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    startRound(true);
-    router.replace("/quiz");
-  };
-
-  const handleNewRound = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    startRound(false);
-    router.replace("/quiz");
-  };
-
-  const handleChangeMode = () => {
-    router.replace("/mode-select");
-  };
-
-  const handleHome = () => {
-    router.replace("/");
-  };
-
   const webTopPadding = Platform.OS === "web" ? 67 : 0;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 20 + webTopPadding }]}>
+    <View style={[styles.container, { paddingTop: insets.top + 16 + webTopPadding }]}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 32 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.homeBtn} onPress={handleHome}>
-            <Text style={styles.homeBtnText}>⌂ Home</Text>
+          <TouchableOpacity style={styles.homeBtn} onPress={() => router.replace("/")}>
+            <Ionicons name="home-outline" size={20} color={Colors.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -79,19 +52,19 @@ export default function ResultsScreen() {
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={[styles.statMark, { color: Colors.correctGreen }]}>✓</Text>
+              <Ionicons name="checkmark-circle" size={22} color={Colors.correctGreen} />
               <Text style={styles.statNum}>{correctCount}</Text>
               <Text style={styles.statLabel}>Correct</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statMark, { color: Colors.wrongRed }]}>✕</Text>
+              <Ionicons name="close-circle" size={22} color={Colors.wrongRed} />
               <Text style={styles.statNum}>{wrongCount}</Text>
               <Text style={styles.statLabel}>Wrong</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statMark, { color: Colors.accentBlue }]}>#</Text>
+              <Ionicons name="list-outline" size={22} color={Colors.accentBlue} />
               <Text style={styles.statNum}>{total}</Text>
               <Text style={styles.statLabel}>Total</Text>
             </View>
@@ -100,9 +73,7 @@ export default function ResultsScreen() {
 
         {wrongInRound.length > 0 && (
           <View style={styles.wrongSection}>
-            <Text style={styles.wrongTitle}>
-              {wrongInRound.length} Sentence{wrongInRound.length > 1 ? "s" : ""} to Review
-            </Text>
+            <Text style={styles.wrongTitle}>{wrongInRound.length} to Review</Text>
             {wrongInRound.map((pair) => (
               <View key={pair.english} style={styles.wrongCard}>
                 <Text style={styles.wrongEnglish}>{pair.english}</Text>
@@ -114,16 +85,17 @@ export default function ResultsScreen() {
 
         <View style={styles.actionsSection}>
           {wrongInRound.length > 0 && (
-            <TouchableOpacity style={styles.retryBtn} onPress={handleRetryWeak} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.retryBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); startRound(true); router.replace("/quiz"); }} activeOpacity={0.85}>
+              <Ionicons name="refresh-outline" size={18} color={Colors.wrongRed} />
               <Text style={styles.retryBtnText}>Retry Weak Words ({wrongInRound.length})</Text>
             </TouchableOpacity>
           )}
-
-          <TouchableOpacity style={styles.newRoundBtn} onPress={handleNewRound} activeOpacity={0.85}>
+          <TouchableOpacity style={styles.newRoundBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); startRound(false); router.replace("/quiz"); }} activeOpacity={0.85}>
+            <Ionicons name="play-outline" size={18} color={Colors.white} />
             <Text style={styles.newRoundBtnText}>New Round</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.modeBtn} onPress={handleChangeMode} activeOpacity={0.85}>
+          <TouchableOpacity style={styles.modeBtn} onPress={() => router.replace("/mode-select")} activeOpacity={0.85}>
+            <Ionicons name="swap-horizontal-outline" size={18} color={Colors.accentBlue} />
             <Text style={styles.modeBtnText}>Change Mode</Text>
           </TouchableOpacity>
         </View>
@@ -133,183 +105,72 @@ export default function ResultsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.navy,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
+  container: { flex: 1, backgroundColor: Colors.navy },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 22 },
+  header: { flexDirection: "row", marginBottom: 18 },
   homeBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    width: 42, height: 42, borderRadius: 12,
     backgroundColor: Colors.navyCard,
-  },
-  homeBtnText: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: Colors.textMuted,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: Colors.border,
   },
   scoreCard: {
-    backgroundColor: Colors.navyCard,
-    borderRadius: 28,
-    padding: 28,
-    alignItems: "center",
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    backgroundColor: Colors.navyCard, borderRadius: 26,
+    padding: 26, alignItems: "center", marginBottom: 20,
+    borderWidth: 1, borderColor: Colors.border,
   },
   completedLabel: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 20,
+    fontSize: 12, fontFamily: "Inter_600SemiBold",
+    color: Colors.textMuted, textTransform: "uppercase",
+    letterSpacing: 1.2, marginBottom: 20,
   },
   accuracyCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    borderWidth: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    width: 136, height: 136, borderRadius: 68,
+    borderWidth: 4, alignItems: "center", justifyContent: "center",
+    marginBottom: 18, backgroundColor: Colors.navyLight,
   },
-  accuracyPct: {
-    fontSize: 42,
-    fontFamily: "Inter_700Bold",
-    lineHeight: 48,
-  },
-  accuracyLabel: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-  },
+  accuracyPct: { fontSize: 40, fontFamily: "Inter_700Bold", lineHeight: 46 },
+  accuracyLabel: { fontSize: 12, fontFamily: "Inter_400Regular", color: Colors.textMuted },
   message: {
-    fontSize: 16,
-    fontFamily: "Inter_500Medium",
-    color: Colors.white,
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 22,
+    fontSize: 15, fontFamily: "Inter_500Medium", color: Colors.white,
+    textAlign: "center", marginBottom: 22, lineHeight: 22,
   },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  statMark: {
-    fontSize: 22,
-    fontFamily: "Inter_700Bold",
-    lineHeight: 28,
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: "rgba(255,255,255,0.08)",
-  },
-  statNum: {
-    fontSize: 24,
-    fontFamily: "Inter_700Bold",
-    color: Colors.white,
-    lineHeight: 28,
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-  },
-  wrongSection: {
-    marginBottom: 24,
-  },
+  statsRow: { flexDirection: "row", alignItems: "center", width: "100%" },
+  statItem: { flex: 1, alignItems: "center", gap: 4 },
+  statDivider: { width: 1, height: 38, backgroundColor: Colors.border },
+  statNum: { fontSize: 22, fontFamily: "Inter_700Bold", color: Colors.white, lineHeight: 26 },
+  statLabel: { fontSize: 11, fontFamily: "Inter_400Regular", color: Colors.textMuted },
+  wrongSection: { marginBottom: 20 },
   wrongTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.wrongRed,
-    marginBottom: 12,
+    fontSize: 14, fontFamily: "Inter_600SemiBold",
+    color: Colors.wrongRed, marginBottom: 10,
   },
   wrongCard: {
-    backgroundColor: Colors.navyCard,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.wrongRed,
+    backgroundColor: Colors.navyCard, borderRadius: 12,
+    padding: 14, marginBottom: 8,
+    borderLeftWidth: 3, borderLeftColor: Colors.wrongRed,
+    borderWidth: 1, borderColor: Colors.border,
   },
-  wrongEnglish: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: Colors.white,
-    marginBottom: 4,
-  },
-  wrongRussian: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-  },
-  actionsSection: {
-    gap: 12,
-  },
+  wrongEnglish: { fontSize: 14, fontFamily: "Inter_500Medium", color: Colors.white, marginBottom: 3 },
+  wrongRussian: { fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.textMuted },
+  actionsSection: { gap: 10 },
   retryBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(231, 76, 60, 0.12)",
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(231, 76, 60, 0.3)",
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    backgroundColor: Colors.wrongRed + "15", paddingVertical: 15,
+    borderRadius: 14, gap: 8, borderWidth: 1, borderColor: Colors.wrongRed + "35",
   },
-  retryBtnText: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.wrongRed,
-  },
+  retryBtnText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: Colors.wrongRed },
   newRoundBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.accentBlue,
-    paddingVertical: 18,
-    borderRadius: 16,
-    gap: 10,
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    backgroundColor: Colors.accentBlue, paddingVertical: 17,
+    borderRadius: 16, gap: 10,
   },
-  newRoundBtnText: {
-    fontSize: 17,
-    fontFamily: "Inter_700Bold",
-    color: Colors.white,
-  },
+  newRoundBtnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: Colors.white },
   modeBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(41, 82, 255, 0.1)",
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(41, 82, 255, 0.25)",
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    backgroundColor: Colors.accentBlue + "12", paddingVertical: 15,
+    borderRadius: 14, gap: 8, borderWidth: 1, borderColor: Colors.accentBlue + "30",
   },
-  modeBtnText: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.accentBlue,
-  },
+  modeBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: Colors.accentBlue },
 });

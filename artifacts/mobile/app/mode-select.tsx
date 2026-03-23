@@ -1,11 +1,7 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -28,9 +24,9 @@ export default function ModeSelectScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+    <View style={[styles.container, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 20 }]}>
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Text style={styles.backBtnText}>← Back</Text>
+        <Ionicons name="arrow-back" size={20} color={Colors.textMuted} />
       </TouchableOpacity>
 
       <View style={styles.header}>
@@ -42,54 +38,41 @@ export default function ModeSelectScreen() {
         <ModeCard
           selected={mode === "englishToRussian"}
           onPress={() => handleSelectMode("englishToRussian")}
-          fromLang="English"
-          toLang="Russian"
-          fromFlag="🇬🇧"
-          toFlag="🇷🇺"
+          fromLang="English" toLang="Russian"
+          fromFlag="🇬🇧" toFlag="🇷🇺"
           description="See English, choose the Russian translation"
         />
         <ModeCard
           selected={mode === "russianToEnglish"}
           onPress={() => handleSelectMode("russianToEnglish")}
-          fromLang="Russian"
-          toLang="English"
-          fromFlag="🇷🇺"
-          toFlag="🇬🇧"
+          fromLang="Russian" toLang="English"
+          fromFlag="🇷🇺" toFlag="🇬🇧"
           description="See Russian Cyrillic, choose the English meaning"
         />
       </View>
 
       <View style={styles.infoCard}>
+        <Ionicons name="sparkles-outline" size={16} color={Colors.gold} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.infoTitle}>✦ Spaced Repetition</Text>
+          <Text style={styles.infoTitle}>Spaced Repetition</Text>
           <Text style={styles.infoText}>
-            Words you get wrong appear more often. Master the ones you struggle with first.
+            Words you get wrong appear more often until you master them.
           </Text>
         </View>
       </View>
 
       <TouchableOpacity style={styles.startBtn} onPress={handleStart} activeOpacity={0.85}>
+        <Ionicons name="play" size={20} color={Colors.white} />
         <Text style={styles.startBtnText}>Start 10-Question Round</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-function ModeCard({
-  selected,
-  onPress,
-  fromLang,
-  toLang,
-  fromFlag,
-  toFlag,
-  description,
-}: {
-  selected: boolean;
-  onPress: () => void;
-  fromLang: string;
-  toLang: string;
-  fromFlag: string;
-  toFlag: string;
+function ModeCard({ selected, onPress, fromLang, toLang, fromFlag, toFlag, description }: {
+  selected: boolean; onPress: () => void;
+  fromLang: string; toLang: string;
+  fromFlag: string; toFlag: string;
   description: string;
 }) {
   return (
@@ -104,7 +87,7 @@ function ModeCard({
             <Text style={styles.flagText}>{fromFlag}</Text>
             <Text style={styles.langText}>{fromLang}</Text>
           </View>
-          <Text style={[styles.arrowText, selected && styles.arrowTextSelected]}>→</Text>
+          <Ionicons name="arrow-forward" size={16} color={selected ? Colors.accentBlue : Colors.textMuted} />
           <View style={styles.langPill}>
             <Text style={styles.flagText}>{toFlag}</Text>
             <Text style={styles.langText}>{toLang}</Text>
@@ -114,7 +97,7 @@ function ModeCard({
       </View>
       {selected && (
         <View style={styles.checkmark}>
-          <Text style={styles.checkmarkText}>✓</Text>
+          <Ionicons name="checkmark-circle" size={22} color={Colors.accentBlue} />
         </View>
       )}
     </TouchableOpacity>
@@ -122,145 +105,45 @@ function ModeCard({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.navy,
-    paddingHorizontal: 24,
-  },
+  container: { flex: 1, backgroundColor: Colors.navy, paddingHorizontal: 22 },
   backBtn: {
-    marginBottom: 16,
-    alignSelf: "flex-start",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  backBtnText: {
-    fontSize: 15,
-    fontFamily: "Inter_500Medium",
-    color: Colors.textMuted,
-  },
-  header: {
-    marginBottom: 28,
-  },
-  title: {
-    fontSize: 32,
-    fontFamily: "Inter_700Bold",
-    color: Colors.white,
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-  },
-  modesContainer: {
-    gap: 14,
-    marginBottom: 20,
-  },
-  modeCard: {
+    width: 40, height: 40, borderRadius: 12,
     backgroundColor: Colors.navyCard,
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: "transparent",
-    flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center", justifyContent: "center",
+    marginBottom: 18, borderWidth: 1, borderColor: Colors.border,
   },
-  modeCardSelected: {
-    borderColor: Colors.accentBlue,
-    backgroundColor: "rgba(41, 82, 255, 0.1)",
+  header: { marginBottom: 24 },
+  title: { fontSize: 30, fontFamily: "Inter_700Bold", color: Colors.white, marginBottom: 4 },
+  subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", color: Colors.textMuted },
+  modesContainer: { gap: 12, marginBottom: 18 },
+  modeCard: {
+    backgroundColor: Colors.navyCard, borderRadius: 18,
+    padding: 18, borderWidth: 2, borderColor: "transparent",
+    flexDirection: "row", alignItems: "center",
   },
-  modeCardInner: {
-    flex: 1,
-    gap: 10,
-  },
-  langRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+  modeCardSelected: { borderColor: Colors.accentBlue, backgroundColor: Colors.accentBlue + "12" },
+  modeCardInner: { flex: 1, gap: 10 },
+  langRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   langPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.07)",
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: Colors.navyLight, borderRadius: 10,
+    paddingVertical: 6, paddingHorizontal: 12,
   },
-  flagText: {
-    fontSize: 16,
-  },
-  langText: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.white,
-  },
-  arrowText: {
-    fontSize: 18,
-    color: Colors.textMuted,
-    fontFamily: "Inter_400Regular",
-  },
-  arrowTextSelected: {
-    color: Colors.accentBlue,
-  },
-  modeDesc: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-    lineHeight: 20,
-  },
-  modeDescSelected: {
-    color: "rgba(255,255,255,0.7)",
-  },
-  checkmark: {
-    marginLeft: 12,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.accentBlue,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkmarkText: {
-    fontSize: 16,
-    color: Colors.white,
-    fontFamily: "Inter_700Bold",
-  },
+  flagText: { fontSize: 16 },
+  langText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: Colors.white },
+  modeDesc: { fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.textMuted, lineHeight: 18 },
+  modeDescSelected: { color: "rgba(255,255,255,0.75)" },
+  checkmark: { marginLeft: 12 },
   infoCard: {
-    backgroundColor: "rgba(255, 209, 102, 0.08)",
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    marginBottom: 28,
-    borderWidth: 1,
-    borderColor: "rgba(255, 209, 102, 0.15)",
+    backgroundColor: Colors.gold + "10", borderRadius: 14,
+    padding: 14, flexDirection: "row", alignItems: "flex-start",
+    gap: 10, marginBottom: 24, borderWidth: 1, borderColor: Colors.gold + "25",
   },
-  infoTitle: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.gold,
-    marginBottom: 4,
-  },
-  infoText: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-    lineHeight: 18,
-  },
+  infoTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: Colors.gold, marginBottom: 3 },
+  infoText: { fontSize: 12, fontFamily: "Inter_400Regular", color: Colors.textMuted, lineHeight: 17 },
   startBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.accentBlue,
-    paddingVertical: 18,
-    borderRadius: 16,
-    gap: 10,
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    backgroundColor: Colors.accentBlue, paddingVertical: 18, borderRadius: 16, gap: 10,
   },
-  startBtnText: {
-    fontSize: 17,
-    fontFamily: "Inter_700Bold",
-    color: Colors.white,
-  },
+  startBtnText: { fontSize: 17, fontFamily: "Inter_700Bold", color: Colors.white },
 });

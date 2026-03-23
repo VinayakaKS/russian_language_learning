@@ -5,16 +5,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
   Platform,
 } from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useQuiz } from "@/context/QuizContext";
 
 export default function HomeScreen() {
-  const { allSentences, statsMap, loadFromStorage, clearData } = useQuiz();
+  const { allSentences, statsMap, loadFromStorage } = useQuiz();
   const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
@@ -38,23 +40,32 @@ export default function HomeScreen() {
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: insets.top + 20 + webTopPadding,
-          paddingBottom: insets.bottom + 20,
-        },
+    <ScrollView
+      style={{ flex: 1, backgroundColor: Colors.navy }}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingTop: insets.top + 20 + webTopPadding, paddingBottom: insets.bottom + 32 },
       ]}
+      showsVerticalScrollIndicator={false}
     >
-      <View style={styles.brandRow}>
-        <View style={styles.logoCircle}>
-          <Text style={styles.logoText}>RU</Text>
+      {/* Top bar */}
+      <View style={styles.topBar}>
+        <View style={styles.brandRow}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoText}>RU</Text>
+          </View>
+          <View>
+            <Text style={styles.appName}>Russian Learner</Text>
+            <Text style={styles.tagline}>Audio-first spaced repetition</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.appName}>Russian Learner</Text>
-          <Text style={styles.tagline}>Pimsleur-inspired audio quiz</Text>
-        </View>
+        <TouchableOpacity
+          style={styles.infoBtn}
+          onPress={() => router.push("/how-it-works")}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons name="information-circle-outline" size={26} color={Colors.textMuted} />
+        </TouchableOpacity>
       </View>
 
       {allSentences.length > 0 ? (
@@ -73,47 +84,14 @@ export default function HomeScreen() {
             }}
             activeOpacity={0.85}
           >
+            <Ionicons name="play" size={20} color={Colors.white} />
             <Text style={styles.primaryBtnText}>Start Quiz</Text>
           </TouchableOpacity>
 
-          <View style={styles.secondaryActions}>
-            <TouchableOpacity
-              style={styles.secondaryBtn}
-              onPress={() => router.push("/vocab")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.secondaryBtnText}>View All Vocabulary</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.secondaryBtn, { marginTop: 10 }]}
-              onPress={() => router.push("/manual-entry")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.secondaryBtnText}>Add More Sentences</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.secondaryBtn, { marginTop: 10 }]}
-              onPress={() => router.push("/upload")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.secondaryBtnText}>Import from File</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.featuresSection}>
-            <Text style={styles.featuresTitle}>How It Works</Text>
-            <FeatureRow
-              title="Audio-First Learning"
-              desc="Auto-plays TTS for every sentence, tap speaker icons to replay"
-            />
-            <FeatureRow
-              title="Spaced Repetition"
-              desc="Difficult words appear more often until you master them"
-            />
-            <FeatureRow
-              title="Progress Tracking"
-              desc="Track accuracy and review sentences you struggled with"
-            />
+          <View style={styles.actionGrid}>
+            <ActionTile label="My Vocabulary" icon="list-outline" onPress={() => router.push("/vocab")} />
+            <ActionTile label="Add Sentences" icon="add-circle-outline" onPress={() => router.push("/manual-entry")} />
+            <ActionTile label="Import File" icon="cloud-upload-outline" onPress={() => router.push("/upload")} />
           </View>
         </>
       ) : (
@@ -123,8 +101,9 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.emptyTitle}>No Vocabulary Yet</Text>
           <Text style={styles.emptyDesc}>
-            Import an Excel or CSV file with your Russian vocabulary to get started
+            Import an Excel or CSV file, or type your sentences directly to get started.
           </Text>
+
           <TouchableOpacity
             style={styles.primaryBtn}
             onPress={() => {
@@ -133,84 +112,95 @@ export default function HomeScreen() {
             }}
             activeOpacity={0.85}
           >
+            <Ionicons name="cloud-upload-outline" size={20} color={Colors.white} />
             <Text style={styles.primaryBtnText}>Import Vocabulary</Text>
           </TouchableOpacity>
 
-          <View style={styles.featuresSection}>
-            <FeatureRow title="Audio-First Learning" desc="Hear every word spoken in native Russian" />
-            <FeatureRow title="Spaced Repetition" desc="Focus on words you haven't mastered yet" />
-            <FeatureRow title="Multiple Choice Quiz" desc="4 options per question, instant audio feedback" />
-          </View>
+          <TouchableOpacity
+            style={styles.secondaryBtn}
+            onPress={() => router.push("/manual-entry")}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="create-outline" size={18} color={Colors.accentBlue} />
+            <Text style={styles.secondaryBtnText}>Type Sentences Manually</Text>
+          </TouchableOpacity>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 function StatCard({ value, label, color }: { value: string; label: string; color: string }) {
   return (
-    <View style={[styles.statCard, { borderColor: color + "22" }]}>
+    <View style={[styles.statCard, { borderColor: color + "30" }]}>
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
-function FeatureRow({ title, desc }: { title: string; desc: string }) {
+function ActionTile({ label, icon, onPress }: { label: string; icon: string; onPress: () => void }) {
   return (
-    <View style={styles.featureRow}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.featureTitle}>{title}</Text>
-        <Text style={styles.featureDesc}>{desc}</Text>
-      </View>
-    </View>
+    <TouchableOpacity style={styles.actionTile} onPress={onPress} activeOpacity={0.8}>
+      <Ionicons name={icon as any} size={22} color={Colors.accentBlue} />
+      <Text style={styles.actionTileLabel}>{label}</Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.navy,
-    paddingHorizontal: 24,
-  },
-  centered: {
+  container: { flex: 1, backgroundColor: Colors.navy },
+  centered: { alignItems: "center", justifyContent: "center" },
+  scrollContent: { paddingHorizontal: 22 },
+  topBar: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    marginBottom: 28,
   },
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    marginBottom: 32,
+    gap: 12,
   },
   logoCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: Colors.accentBlue,
     alignItems: "center",
     justifyContent: "center",
   },
   logoText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Inter_700Bold",
     color: Colors.white,
   },
   appName: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: "Inter_700Bold",
     color: Colors.white,
   },
   tagline: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Inter_400Regular",
     color: Colors.textMuted,
-    marginTop: 2,
+    marginTop: 1,
+  },
+  infoBtn: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: Colors.navyCard,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   statsGrid: {
     flexDirection: "row",
     gap: 10,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   statCard: {
     flex: 1,
@@ -221,99 +211,65 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: "Inter_700Bold",
-    lineHeight: 24,
-    marginBottom: 6,
+    lineHeight: 26,
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 11,
     fontFamily: "Inter_400Regular",
     color: Colors.textMuted,
-    marginTop: 2,
   },
   primaryBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.accentBlue,
-    paddingVertical: 18,
+    paddingVertical: 17,
     borderRadius: 16,
     gap: 10,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   primaryBtnText: {
     fontSize: 17,
     fontFamily: "Inter_700Bold",
     color: Colors.white,
   },
-  secondaryActions: {
-    marginBottom: 32,
-  },
-  secondaryBtn: {
+  actionGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(41, 82, 255, 0.3)",
-    backgroundColor: "rgba(41, 82, 255, 0.06)",
+    gap: 10,
   },
-  secondaryBtnText: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: Colors.accentBlue,
-  },
-  featuresSection: {
-    gap: 12,
-    marginTop: 4,
-  },
-  featuresTitle: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 4,
-  },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
+  actionTile: {
+    flex: 1,
     backgroundColor: Colors.navyCard,
     borderRadius: 14,
-    padding: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  featureTitle: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.white,
-    marginBottom: 3,
-  },
-  featureDesc: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
+  actionTileLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
     color: Colors.textMuted,
-    lineHeight: 18,
+    textAlign: "center",
   },
-  emptyState: {
-    flex: 1,
-  },
+  emptyState: { paddingTop: 20 },
   emptyIcon: {
     width: 88,
     height: 88,
     borderRadius: 24,
-    backgroundColor: "rgba(41, 82, 255, 0.1)",
+    backgroundColor: Colors.navyCard,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  emptyIconText: {
-    fontSize: 40,
-  },
+  emptyIconText: { fontSize: 38 },
   emptyTitle: {
     fontSize: 24,
     fontFamily: "Inter_700Bold",
@@ -322,11 +278,28 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   emptyDesc: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Inter_400Regular",
     color: Colors.textMuted,
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 28,
+  },
+  secondaryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.accentBlue + "50",
+    backgroundColor: Colors.accentBlue + "10",
+    marginTop: 12,
+  },
+  secondaryBtnText: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: Colors.accentBlue,
   },
 });

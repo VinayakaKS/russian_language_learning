@@ -30,6 +30,7 @@ function RootLayoutNav() {
       <Stack.Screen name="results" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="manual-entry" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="vocab" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="how-it-works" options={{ animation: "slide_from_right" }} />
     </Stack>
   );
 }
@@ -40,6 +41,8 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Ionicons: require("@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"),
+    MaterialIcons: require("@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf"),
   });
 
   useEffect(() => {
