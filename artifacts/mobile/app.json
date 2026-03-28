@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Russian Language Learner",
-    "slug": "mobile",
+    "name": "Russian Lingua",
+    "slug": "russian-lingua",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -11,27 +11,29 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0D1B3E"
+      "backgroundColor": "#1A1B1E"
     },
     "ios": {
       "supportsTablet": false
     },
     "android": {
-      "package": "com.vinayakaksgupta.mobile"
+      "package": "com.vinayakaksgupta.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#1A1B1E"
+      }
     },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
-    "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://replit.com/"
-        }
-      ],
-      "expo-font",
-      "expo-web-browser"
-    ],
+  "plugins": [
+  [
+    "expo-font",
+    {
+      "fonts": ["node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"]
+    }
+  ]
+],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

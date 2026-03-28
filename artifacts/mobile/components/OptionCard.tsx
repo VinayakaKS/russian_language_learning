@@ -1,138 +1,107 @@
 import React, { useEffect, useRef } from "react";
-import {
-  Animated,
-  TouchableOpacity,
-  View,
-  Text,
-  StyleSheet,
-} from "react-native";
+import { View, Text, StyleSheet, Pressable, Animated } from "react-native";
+import Colors from "@/constants/colors";
 import { SpeakerButton } from "@/components/SpeakerButton";
 import { SentencePair } from "@/models/SentencePair";
-import { QuizMode } from "@/models/QuizMode";
-import Colors from "@/constants/colors";
-
-type OptionState = "default" | "correct" | "wrong";
 
 interface OptionCardProps {
   pair: SentencePair;
-  mode: QuizMode;
-  state: OptionState;
+  mode: "englishToRussian" | "russianToEnglish";
+  state: "default" | "correct" | "wrong";
   onPress: () => void;
   showTranslation: boolean;
 }
 
-const BG_COLORS: Record<OptionState, string> = {
-  default: Colors.cardBg,
-  correct: Colors.correctGreen,
-  wrong: Colors.wrongRed,
-};
-
-const TEXT_COLORS: Record<OptionState, string> = {
-  default: "#1A1A2E",
-  correct: Colors.white,
-  wrong: Colors.white,
-};
-
 export function OptionCard({ pair, mode, state, onPress, showTranslation }: OptionCardProps) {
-  const bgAnim = useRef(new Animated.Value(0)).current;
-
-  // What the user sees as the main option text
-  const displayText = mode === "englishToRussian" ? pair.russian : pair.english;
-
-  // The revealed translation shown after answering
-  const translationText = mode === "englishToRussian" ? pair.english : pair.russian;
-
-  // Speaker always reads RUSSIAN:
-  // - englishToRussian mode: options show Russian → speak Russian immediately
-  // - russianToEnglish mode: options show English → speak Russian only after the Russian is revealed
-  const speakerText = pair.russian;
-  const speakerLang = "ru-RU" as const;
-
-  // Show speaker:
-  // - englishToRussian: always (options are Russian)
-  // - russianToEnglish: only after answering (when Russian translation is revealed)
-  const showSpeaker = mode === "englishToRussian" || showTranslation;
+  const borderAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(bgAnim, {
-      toValue: state === "default" ? 0 : 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [state]);
+    if (state !== "default") {
+      Animated.timing(borderAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      borderAnim.setValue(0);
+    }
+  }, [state, borderAnim]);
 
-  const bgColor = bgAnim.interpolate({
+  const borderColor = borderAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [Colors.cardBg, BG_COLORS[state]],
+    outputRange: [
+      "transparent",
+      state === "correct"
+        ? Colors.correctGreen
+        : state === "wrong"
+        ? Colors.wrongRed
+        : "transparent",
+    ],
   });
 
-  const isDisabled = state !== "default" || showTranslation;
-  const textColor = TEXT_COLORS[state];
+  const displayText = mode === "englishToRussian" ? pair.russian : pair.english;
+  const translationText = mode === "englishToRussian" ? pair.english : pair.russian;
+
+  const showSpeaker = mode === "englishToRussian" || showTranslation;
+  const speakerText = pair.russian;
+  const speakerColor =
+    state === "default"
+      ? Colors.accentBlue
+      : state === "correct"
+      ? Colors.correctGreen
+      : Colors.wrongRed;
 
   return (
-    <Animated.View style={[styles.card, { backgroundColor: bgColor }]}>
-      <TouchableOpacity
-        onPress={onPress}
-        disabled={isDisabled}
-        activeOpacity={0.85}
-        style={styles.inner}
+    <Pressable onPress={onPress} style={styles.container}>
+      <Animated.View
+        style={[
+          styles.card,
+          {
+            borderLeftColor: borderColor,
+            borderLeftWidth: 3,
+          },
+        ]}
       >
         {showSpeaker && (
-          <View style={styles.leftIcon}>
-            <SpeakerButton
-              text={speakerText}
-              language={speakerLang}
-              size={18}
-              color={state === "default" ? Colors.accentBlue : "rgba(255,255,255,0.85)"}
-            />
-          </View>
+          <SpeakerButton
+            text={speakerText}
+            language="ru-RU"
+            size={18}
+            color={speakerColor}
+          />
         )}
-        <View style={[styles.textContainer, !showSpeaker && styles.textContainerFull]}>
-          <Text style={[styles.optionText, { color: textColor }]}>{displayText}</Text>
+
+        <View style={styles.textColumn}>
+          <Text style={styles.mainText}>{displayText}</Text>
           {showTranslation && (
-            <Text style={[styles.translationText, { color: state === "default" ? Colors.textMuted : "rgba(255,255,255,0.75)" }]}>
-              {translationText}
-            </Text>
+            <Text style={styles.translationText}>{translationText}</Text>
           )}
         </View>
-      </TouchableOpacity>
-    </Animated.View>
+      </Animated.View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { marginBottom: 10 },
   card: {
-    borderRadius: 16,
-    marginBottom: 12,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  inner: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    backgroundColor: Colors.cardBg,
+    borderRadius: 14,
+    padding: 14,
+    gap: 12,
   },
-  leftIcon: {
-    marginRight: 12,
-  },
-  textContainer: {
-    flex: 1,
-    gap: 4,
-  },
-  textContainerFull: {
-    marginLeft: 0,
-  },
-  optionText: {
-    fontSize: 16,
-    fontFamily: "Inter_500Medium",
-    lineHeight: 22,
+  textColumn: { flex: 1 },
+  mainText: {
+    fontSize: 15,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.white,
   },
   translationText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Inter_400Regular",
+    color: Colors.textMuted,
+    marginTop: 4,
   },
 });

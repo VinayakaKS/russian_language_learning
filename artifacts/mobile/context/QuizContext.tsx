@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as FileSystem from "expo-file-system";
-import React, { createContext, useCallback, useContext, useRef, useState } from "react";
+import * as FileSystem from "expo-file-system/legacy";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SentencePair } from "@/models/SentencePair";
 import { SentenceStats, defaultStats } from "@/models/SentenceStats";
 import { QuizMode } from "@/models/QuizMode";
@@ -10,6 +10,7 @@ const STATS_KEY = "quiz_stats_v2";
 const VOCAB_FILE = (FileSystem.documentDirectory ?? "") + "vocab.json";
 const STATS_FILE = (FileSystem.documentDirectory ?? "") + "stats.json";
 const ROUND_SIZE = 10;
+const WEIGHTS_STORAGE_KEY = "quiz_sentence_weights_v1";
 
 // ─── File helpers ─────────────────────────────────────────────────────────────
 
@@ -126,9 +127,12 @@ interface QuizContextType {
   wrongCount: number;
   mode: QuizMode;
   wrongInRound: SentencePair[];
+  hardInRound: SentencePair[];
   options: SentencePair[];
   selectedAnswer: SentencePair | null;
   isAnswered: boolean;
+  markAsHard: (pair: SentencePair) => Promise<void>;
+  markAsEasy: (pair: SentencePair) => Promise<void>;
 
   loadSentences: (pairs: SentencePair[]) => Promise<void>;
   loadFromStorage: () => Promise<boolean>;
@@ -157,9 +161,11 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
   const [wrongCount, setWrongCount] = useState(0);
   const [mode, setModeState] = useState<QuizMode>("englishToRussian");
   const [wrongInRound, setWrongInRound] = useState<SentencePair[]>([]);
+  const [hardInRound, setHardInRound] = useState<SentencePair[]>([]);
   const [options, setOptions] = useState<SentencePair[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<SentencePair | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [sentenceWeights, setSentenceWeights] = useState<Record<string, number>>({});
 
   const stateRef = useRef({
     allSentences,
@@ -167,9 +173,22 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     currentRound,
     currentIndex,
     wrongInRound,
+    hardInRound,
     isAnswered,
   });
-  stateRef.current = { allSentences, statsMap, currentRound, currentIndex, wrongInRound, isAnswered };
+  stateRef.current = { allSentences, statsMap, currentRound, currentIndex, wrongInRound, hardInRound, isAnswered };
+
+  useEffect(() => {
+    // ...existing code...
+    (async () => {
+      try {
+        const rawWeights = await AsyncStorage.getItem(WEIGHTS_STORAGE_KEY);
+        if (rawWeights) setSentenceWeights(JSON.parse(rawWeights));
+      } catch {
+        // ...existing error handling pattern...
+      }
+    })();
+  }, []);
 
   const loadSentences = useCallback(async (pairs: SentencePair[]) => {
     setAllSentences(pairs);
@@ -204,6 +223,7 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     setCorrectCount(0);
     setWrongCount(0);
     setWrongInRound([]);
+    setHardInRound([]);
     setSelectedAnswer(null);
     setIsAnswered(false);
     if (round.length > 0) {
@@ -266,6 +286,26 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     setCurrentIndex(0);
   }, []);
 
+  const persistSentenceWeights = async (next: Record<string, number>) => {
+    await AsyncStorage.setItem(WEIGHTS_STORAGE_KEY, JSON.stringify(next));
+  };
+
+  const markAsHard = async (pair: SentencePair) => {
+    const key = getPairKey(pair);
+    const next = { ...sentenceWeights, [key]: 8 };
+    setSentenceWeights(next);
+    setHardInRound((prev) => (prev.some((p) => p.english === pair.english) ? prev : [...prev, pair]));
+    await persistSentenceWeights(next);
+  };
+
+  const markAsEasy = async (pair: SentencePair) => {
+    const key = getPairKey(pair);
+    const next = { ...sentenceWeights, [key]: 1 };
+    setSentenceWeights(next);
+    setHardInRound((prev) => prev.filter((p) => p.english !== pair.english));
+    await persistSentenceWeights(next);
+  };
+
   const value: QuizContextType = {
     allSentences,
     statsMap,
@@ -275,9 +315,12 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     wrongCount,
     mode,
     wrongInRound,
+    hardInRound,
     options,
     selectedAnswer,
     isAnswered,
+    markAsHard,
+    markAsEasy,
     loadSentences,
     loadFromStorage,
     deleteSentence,
@@ -290,3 +333,6 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
 }
+
+const getPairKey = (pair: SentencePair) =>
+  `${pair.russian}__${pair.english}`;

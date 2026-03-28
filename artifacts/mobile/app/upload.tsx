@@ -70,7 +70,7 @@ export default function UploadScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Russian Learner</Text>
+        <Text style={styles.title}>Russian Lingua</Text>
         <Text style={styles.subtitle}>Import your vocabulary to get started</Text>
       </View>
 

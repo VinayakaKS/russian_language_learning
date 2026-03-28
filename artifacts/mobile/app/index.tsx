@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
@@ -52,10 +53,13 @@ export default function HomeScreen() {
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
           <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>RU</Text>
+            <Image
+              source={require("@/assets/images/icon.png")}
+              style={{ width: 48, height: 48, borderRadius: 14 }}
+            />
           </View>
           <View>
-            <Text style={styles.appName}>Russian Learner</Text>
+            <Text style={styles.appName}>Russian Lingua</Text>
             <Text style={styles.tagline}>Audio-first spaced repetition</Text>
           </View>
         </View>

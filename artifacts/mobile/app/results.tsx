@@ -8,7 +8,7 @@ import Colors from "@/constants/colors";
 import { useQuiz } from "@/context/QuizContext";
 
 export default function ResultsScreen() {
-  const { correctCount, wrongCount, wrongInRound, startRound } = useQuiz();
+  const { correctCount, wrongCount, wrongInRound, hardInRound, startRound } = useQuiz();
   const insets = useSafeAreaInsets();
   const total = correctCount + wrongCount;
   const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
@@ -78,6 +78,18 @@ export default function ResultsScreen() {
               <View key={pair.english} style={styles.wrongCard}>
                 <Text style={styles.wrongEnglish}>{pair.english}</Text>
                 <Text style={styles.wrongRussian}>{pair.russian}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {hardInRound.length > 0 && (
+          <View style={styles.hardSection}>
+            <Text style={styles.hardSectionTitle}>Marked as Hard</Text>
+            {hardInRound.map((pair) => (
+              <View key={`hard-${pair.english}`} style={styles.hardCard}>
+                <Text style={styles.hardEnglish}>{pair.english}</Text>
+                <Text style={styles.hardRussian}>{pair.russian}</Text>
               </View>
             ))}
           </View>
@@ -173,4 +185,24 @@ const styles = StyleSheet.create({
     borderRadius: 14, gap: 8, borderWidth: 1, borderColor: Colors.accentBlue + "30",
   },
   modeBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: Colors.accentBlue },
+  hardSection: {
+    marginBottom: 20,
+  },
+  hardSectionTitle: {
+    fontSize: 14, fontFamily: "Inter_600SemiBold",
+    color: "#FFD60A",
+    marginBottom: 10,
+  },
+  hardCard: {
+    backgroundColor: Colors.navyCard, borderRadius: 12,
+    padding: 14, marginBottom: 8,
+    borderLeftWidth: 3, borderLeftColor: Colors.wrongRed,
+    borderWidth: 1, borderColor: Colors.border,
+  },
+  hardEnglish: {
+    fontSize: 14, fontFamily: "Inter_500Medium", color: Colors.white, marginBottom: 3,
+  },
+  hardRussian: {
+    fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.textMuted,
+  },
 });

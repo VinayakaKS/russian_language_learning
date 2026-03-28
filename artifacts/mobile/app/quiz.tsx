@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Platform } from "react-native";
+import React, { useEffect, useRef, useCallback, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Platform, Pressable } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -16,10 +16,13 @@ export default function QuizScreen() {
   const {
     currentRound, currentIndex, mode, options,
     selectedAnswer, isAnswered, selectAnswer, nextQuestion,
+    markAsHard,
+    markAsEasy,
   } = useQuiz();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(0)).current;
   const prevIndex = useRef(currentIndex);
+  const [difficulty, setDifficulty] = useState<"hard" | "easy" | null>(null);
 
   const currentQuestion = currentRound[currentIndex];
   const totalQuestions = currentRound.length;
@@ -31,8 +34,9 @@ export default function QuizScreen() {
 
   const autoPlay = useCallback(() => {
     if (!currentQuestion) return;
-    const text = mode === "englishToRussian" ? currentQuestion.english : currentQuestion.russian;
-    setTimeout(() => Speech.speak(text, { language: promptLang, rate: 0.85 }), 300);
+    if (mode !== "russianToEnglish") return;
+    const text = currentQuestion.russian;
+    setTimeout(() => Speech.speak(text, { language: "ru-RU", rate: 0.85 }), 300);
   }, [currentQuestion, mode]);
 
   useEffect(() => {
@@ -43,6 +47,8 @@ export default function QuizScreen() {
       ]).start();
       prevIndex.current = currentIndex;
     }
+    setDifficulty(null);
+    Speech.stop();
     autoPlay();
   }, [currentIndex, autoPlay]);
 
@@ -56,9 +62,13 @@ export default function QuizScreen() {
       ? Haptics.NotificationFeedbackType.Success
       : Haptics.NotificationFeedbackType.Error);
     selectAnswer(pair);
+    if (isCorrect) {
+      setTimeout(() => Speech.speak(correct.russian, { language: "ru-RU", rate: 0.85 }), 400);
+    }
   };
 
   const handleNext = () => {
+    setDifficulty(null);
     Speech.stop();
     currentIndex + 1 >= totalQuestions ? router.push("/results") : nextQuestion();
   };
@@ -70,6 +80,8 @@ export default function QuizScreen() {
     if (selectedAnswer?.english === pair.english) return "wrong" as const;
     return "default" as const;
   };
+
+  const currentPair: SentencePair | null = currentQuestion ?? null;
 
   if (!currentQuestion) {
     return (
@@ -90,8 +102,12 @@ export default function QuizScreen() {
         <TouchableOpacity style={styles.exitBtn} onPress={handleExit}>
           <Ionicons name="close" size={20} color={Colors.textMuted} />
         </TouchableOpacity>
-        <ProgressBar progress={(currentIndex + (isAnswered ? 1 : 0)) / totalQuestions} />
-        <Text style={styles.counter}>{currentIndex + 1} / {totalQuestions}</Text>
+
+        <View style={styles.progressWrap}>
+          <ProgressBar progress={(currentIndex + (isAnswered ? 1 : 0)) / totalQuestions} />
+        </View>
+
+        <Text style={styles.counterText}>{currentIndex + 1} / {totalQuestions}</Text>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}
@@ -114,6 +130,32 @@ export default function QuizScreen() {
             state={getOptionState(pair)} onPress={() => handleSelect(pair)}
             showTranslation={isAnswered} />
         ))}
+
+        {isAnswered && (
+          <View style={styles.difficultyRow}>
+            <Pressable
+              style={[styles.difficultyBtn, styles.hardBtn, difficulty === "hard" && styles.hardBtnSelected]}
+              onPress={() => {
+                if (!currentPair) return;
+                void markAsHard(currentPair);
+                setDifficulty("hard");
+              }}
+            >
+              <Text style={[styles.difficultyBtnText, styles.hardBtnText]}>Hard</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.difficultyBtn, styles.easyBtn, difficulty === "easy" && styles.easyBtnSelected]}
+              onPress={() => {
+                if (!currentPair) return;
+                void markAsEasy(currentPair);
+                setDifficulty("easy");
+              }}
+            >
+              <Text style={[styles.difficultyBtnText, styles.easyBtnText]}>Easy</Text>
+            </Pressable>
+          </View>
+        )}
 
         {isAnswered && (
           <TouchableOpacity style={styles.nextBtn} onPress={handleNext} activeOpacity={0.85}>
@@ -140,9 +182,9 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderWidth: 1, borderColor: Colors.border,
   },
-  counter: {
+  counterText: {
     fontSize: 13, fontFamily: "Inter_600SemiBold",
-    color: Colors.textMuted, minWidth: 40, textAlign: "right",
+    color: Colors.white, flexShrink: 0, minWidth: 40, textAlign: "right",
   },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 18, paddingBottom: 32 },
@@ -182,4 +224,44 @@ const styles = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 24, borderRadius: 12,
   },
   errorBtnText: { color: Colors.white, fontFamily: "Inter_600SemiBold", fontSize: 15 },
+  progressWrap: {
+    flex: 1,
+  },
+  difficultyRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  difficultyBtn: {
+    flex: 1,
+    borderRadius: 20,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  hardBtnSelected: {
+      backgroundColor: "#E0525230",
+  },
+  easyBtnSelected: {
+      backgroundColor: "#4CAF5030",
+  },
+  hardBtn: {
+    backgroundColor: "#E0525215",
+  },
+  easyBtn: {
+    backgroundColor: "#4CAF5015",
+  },
+  difficultyBtnText: {
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  hardBtnText: {
+    color: "#E05252",
+  },
+  easyBtnText: {
+    color: "#4CAF50",
+  },
 });
