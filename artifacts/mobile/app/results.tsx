@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,12 +6,18 @@ import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useQuiz } from "@/context/QuizContext";
+import { useStreak } from "@/hooks/useStreak";
 
 export default function ResultsScreen() {
   const { correctCount, wrongCount, wrongInRound, hardInRound, startRound } = useQuiz();
+  const { streak, recordActivity } = useStreak();
   const insets = useSafeAreaInsets();
   const total = correctCount + wrongCount;
   const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  useEffect(() => {
+    recordActivity();
+  }, []);
 
   const getAccuracyColor = () => {
     if (accuracy >= 80) return Colors.correctGreen;
@@ -48,6 +54,18 @@ export default function ResultsScreen() {
             <Text style={[styles.accuracyPct, { color: getAccuracyColor() }]}>{accuracy}%</Text>
             <Text style={styles.accuracyLabel}>Accuracy</Text>
           </View>
+
+          {streak.currentStreak > 0 && (
+            <View style={styles.streakRow}>
+              <Text style={styles.streakText}>
+                🔥 {streak.currentStreak} day streak!
+              </Text>
+              {streak.currentStreak === streak.longestStreak && streak.currentStreak > 1 && (
+                <Text style={styles.streakBest}>Personal best!</Text>
+              )}
+            </View>
+          )}
+
           <Text style={styles.message}>{getAccuracyMessage()}</Text>
 
           <View style={styles.statsRow}>
@@ -144,6 +162,21 @@ const styles = StyleSheet.create({
   },
   accuracyPct: { fontSize: 40, fontFamily: "Inter_700Bold", lineHeight: 46 },
   accuracyLabel: { fontSize: 12, fontFamily: "Inter_400Regular", color: Colors.textMuted },
+  streakRow: {
+    flexDirection: "row", alignItems: "center",
+    gap: 8, marginTop: 8, marginBottom: 4,
+  },
+  streakText: {
+    fontSize: 15, fontFamily: "Inter_600SemiBold",
+    color: "#CC785C",
+  },
+  streakBest: {
+    fontSize: 11, fontFamily: "Inter_500Medium",
+    color: Colors.gold,
+    backgroundColor: Colors.gold + "18",
+    paddingHorizontal: 8, paddingVertical: 3,
+    borderRadius: 8,
+  },
   message: {
     fontSize: 15, fontFamily: "Inter_500Medium", color: Colors.white,
     textAlign: "center", marginBottom: 22, lineHeight: 22,

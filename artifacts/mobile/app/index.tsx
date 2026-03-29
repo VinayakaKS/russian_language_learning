@@ -15,9 +15,11 @@ import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useQuiz } from "@/context/QuizContext";
+import { useStreak } from "@/hooks/useStreak";
 
 export default function HomeScreen() {
   const { allSentences, statsMap, loadFromStorage } = useQuiz();
+  const { streak } = useStreak();
   const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
@@ -74,29 +76,86 @@ export default function HomeScreen() {
 
       {allSentences.length > 0 ? (
         <>
+          <View style={styles.streakBanner}>
+            <Text style={styles.streakFire}>🔥</Text>
+            <View style={styles.streakInfo}>
+              <Text style={styles.streakTitle}>
+                {streak.currentStreak === 0
+                  ? "No streak yet"
+                  : `${streak.currentStreak} Day Streak!`}
+              </Text>
+              <Text style={styles.streakSub}>
+                {streak.currentStreak === 0
+                  ? "Complete a round to start your streak"
+                  : "Keep it up — come back tomorrow"}
+              </Text>
+            </View>
+            <View style={styles.streakBestBadge}>
+              <Text style={styles.streakBestText}>
+                Best: {streak.longestStreak}
+              </Text>
+            </View>
+          </View>
+
           <View style={styles.statsGrid}>
             <StatCard value={allSentences.length.toString()} label="Sentences" color={Colors.accentBlue} />
             <StatCard value={totalStudied.toString()} label="Studied" color={Colors.gold} />
             <StatCard value={`${overallAccuracy}%`} label="Accuracy" color={Colors.correctGreen} />
           </View>
 
-          <TouchableOpacity
-            style={styles.primaryBtn}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              router.push("/mode-select");
-            }}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="play" size={20} color={Colors.white} />
-            <Text style={styles.primaryBtnText}>Start Quiz</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionLabel}>Practice modes</Text>
+          <View style={styles.modeGrid}>
+            <TouchableOpacity
+              style={[styles.modeCard, styles.quizModeCard]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/mode-select");
+              }}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="school-outline" size={28} color={Colors.accentBlue} />
+              <Text style={styles.quizModeTitle}>Quiz Mode</Text>
+              <Text style={styles.modeSubtitle}>Spaced repetition</Text>
+            </TouchableOpacity>
 
-          <View style={styles.actionGrid}>
-            <ActionTile label="My Vocabulary" icon="list-outline" onPress={() => router.push("/vocab")} />
-            <ActionTile label="Add Sentences" icon="add-circle-outline" onPress={() => router.push("/manual-entry")} />
-            <ActionTile label="Import File" icon="cloud-upload-outline" onPress={() => router.push("/upload")} />
-            <ActionTile label="Song Mode" icon="musical-notes-outline" onPress={() => router.push("/song-quiz")} />
+            <TouchableOpacity
+              style={[styles.modeCard, styles.songModeCard]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/song-select");
+              }}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="musical-notes-outline" size={28} color={Colors.gold} />
+              <Text style={styles.songModeTitle}>Song Mode</Text>
+              <Text style={styles.modeSubtitle}>Learn from music</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modeCard, styles.scenarioModeCard]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/scenarios");
+              }}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="map-outline" size={28} color={Colors.correctGreen} />
+              <Text style={styles.scenarioModeTitle}>Scenarios</Text>
+              <Text style={styles.modeSubtitle}>Practice by topic</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.sectionLabel}>Vocabulary</Text>
+          <View style={styles.vocabGrid}>
+            <TouchableOpacity style={styles.vocabTile} onPress={() => router.push("/vocab")} activeOpacity={0.8}>
+              <Ionicons name="list-outline" size={16} color={Colors.accentBlue} />
+              <Text style={styles.vocabTileLabel}>My Vocab</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.vocabTile} onPress={() => router.push("/add-vocab")} activeOpacity={0.8}>
+              <Ionicons name="add-outline" size={16} color={Colors.accentBlue} />
+              <Text style={styles.vocabTileLabel}>Add Vocab</Text>
+            </TouchableOpacity>
           </View>
         </>
       ) : (
@@ -141,15 +200,6 @@ function StatCard({ value, label, color }: { value: string; label: string; color
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
-  );
-}
-
-function ActionTile({ label, icon, onPress }: { label: string; icon: string; onPress: () => void }) {
-  return (
-    <TouchableOpacity style={styles.actionTile} onPress={onPress} activeOpacity={0.8}>
-      <Ionicons name={icon as any} size={22} color={Colors.accentBlue} />
-      <Text style={styles.actionTileLabel}>{label}</Text>
-    </TouchableOpacity>
   );
 }
 
@@ -202,10 +252,44 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  streakBanner: {
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: "#CC785C18",
+    borderRadius: 14, padding: 12, gap: 10,
+    marginBottom: 14,
+    borderWidth: 1, borderColor: "#CC785C35",
+  },
+  streakFire: { fontSize: 24 },
+  streakInfo: { flex: 1 },
+  streakTitle: {
+    fontSize: 13, fontFamily: "Inter_700Bold",
+    color: "#CC785C",
+  },
+  streakSub: {
+    fontSize: 10, fontFamily: "Inter_400Regular",
+    color: Colors.textMuted, marginTop: 2,
+  },
+  streakBestBadge: {
+    backgroundColor: "#CC785C",
+    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4,
+  },
+  streakBestText: {
+    fontSize: 10, fontFamily: "Inter_700Bold",
+    color: "#1A1B1E",
+  },
   statsGrid: {
     flexDirection: "row",
     gap: 10,
     marginBottom: 20,
+  },
+  sectionLabel: {
+    fontSize: 11,
+    color: Colors.textMuted,
+    fontFamily: "Inter_600SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 8,
+    marginTop: 16,
   },
   statCard: {
     flex: 1,
@@ -241,22 +325,76 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: Colors.white,
   },
-  actionGrid: {
+  modeGrid: {
     flexDirection: "row",
     gap: 10,
   },
-  actionTile: {
+  modeCard: {
     flex: 1,
-    backgroundColor: Colors.navyCard,
     borderRadius: 14,
-    paddingVertical: 16,
+    minHeight: 100,
+    padding: 16,
     alignItems: "center",
     gap: 8,
+    justifyContent: "center",
+  },
+  quizModeCard: {
+    backgroundColor: Colors.accentBlue + "18",
+    borderWidth: 0.5,
+    borderColor: Colors.accentBlue + "35",
+  },
+  songModeCard: {
+    backgroundColor: Colors.gold + "18",
+    borderWidth: 0.5,
+    borderColor: Colors.gold + "35",
+  },
+  scenarioModeCard: {
+    backgroundColor: Colors.correctGreen + "18",
+    borderWidth: 0.5,
+    borderColor: Colors.correctGreen + "35",
+  },
+  quizModeTitle: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+    color: Colors.accentBlue,
+    textAlign: "center",
+  },
+  songModeTitle: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+    color: Colors.gold,
+    textAlign: "center",
+  },
+  scenarioModeTitle: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+    color: Colors.correctGreen,
+    textAlign: "center",
+  },
+  modeSubtitle: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+    color: Colors.textMuted,
+    textAlign: "center",
+  },
+  vocabGrid: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  vocabTile: {
+    flex: 1,
+    backgroundColor: Colors.navyCard,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  actionTileLabel: {
-    fontSize: 11,
+  vocabTileLabel: {
+    fontSize: 10,
     fontFamily: "Inter_500Medium",
     color: Colors.textMuted,
     textAlign: "center",

@@ -7,40 +7,52 @@ import Colors from "@/constants/colors";
 
 const sections = [
   {
-    icon: "volume-medium-outline" as const,
-    color: Colors.gold,
-    title: "Audio-First Learning",
-    body: "Every sentence is automatically spoken aloud when a new question appears. Tap the speaker button (♪) on any option to hear it again. This trains your ear as well as your reading.",
+    icon: "apps-outline" as const,
+    color: Colors.accentBlue,
+    title: "Three Ways to Learn",
+    body: "Quiz Mode tests you on your imported sentences with spaced repetition. Song Mode teaches through real Russian music — hear the line, guess the missing word. Scenario Mode groups sentences by real-life situations like At a Café or Morning Routine.",
   },
   {
-    icon: "shuffle-outline" as const,
-    color: Colors.accentBlue,
-    title: "Spaced Repetition",
-    body: "The quiz uses a weighted algorithm. Sentences you answer incorrectly are shown more frequently. Once you get a sentence right three times in a row, it appears less often — letting you focus on what you haven't mastered yet.",
+    icon: "cloud-upload-outline" as const,
+    color: Colors.gold,
+    title: "Add Your Vocabulary",
+    body: "Import an Excel or CSV file — Column A English, Column B Russian, Column C optional scenario name. Or type sentences manually one by one. You can import multiple files and your existing sentences and stats are never overwritten.",
   },
   {
     icon: "radio-button-on-outline" as const,
     color: Colors.correctGreen,
-    title: "Multiple Choice Quiz",
-    body: "Each question presents 4 options. Select the correct translation and the card turns green. Wrong answers turn red. After each answer the Russian is revealed on all options so you can hear and read each one.",
+    title: "How the Quiz Works",
+    body: "Each round has 10 questions. You see a sentence and pick the correct translation from 4 options. After answering, the correct line plays in Russian so you hear it spoken. All 4 option translations are revealed so you learn from wrong answers too.",
+  },
+  {
+    icon: "musical-notes-outline" as const,
+    color: Colors.gold,
+    title: "How Song Mode Works",
+    body: "Pick a song from the library. First, listen to the 10 lines you will be quizzed on. Then guess the missing word in each line from 4 options. After selecting, the correct line plays back in context from the real song.",
+  },
+  {
+    icon: "map-outline" as const,
+    color: Colors.correctGreen,
+    title: "How Scenario Mode Works",
+    body: "If your Excel file has a scenario name in Column C, those sentences are automatically grouped into scenarios. Tap a scenario to start a 10-question quiz using only sentences from that topic.",
+  },
+  {
+    icon: "volume-medium-outline" as const,
+    color: Colors.accentBlue,
+    title: "Audio Playback",
+    body: "Russian sentences are never read in English — only Russian TTS plays. The correct answer plays automatically after you select it. Tap the speaker icon on any option to hear it again at any time.",
+  },
+  {
+    icon: "shuffle-outline" as const,
+    color: Colors.gold,
+    title: "Spaced Repetition",
+    body: "Sentences you get wrong appear more often. Get a sentence right three times in a row and it fades back. After each answer you can also tap Hard or Easy to manually control how often a sentence appears.",
   },
   {
     icon: "bar-chart-outline" as const,
-    color: Colors.accentBlue,
-    title: "Progress Tracking",
-    body: "Your accuracy per sentence is stored on the device. Open 'My Vocabulary' to see your accuracy percentage and attempt count for every sentence, colour-coded by performance.",
-  },
-  {
-    icon: "swap-horizontal-outline" as const,
-    color: Colors.gold,
-    title: "Two Quiz Modes",
-    body: "English → Russian: see English, choose the Russian translation.\nRussian → English: see Cyrillic, choose the English meaning.\nSwitch modes from the mode selection screen anytime.",
-  },
-  {
-    icon: "document-text-outline" as const,
     color: Colors.textMuted,
-    title: "File Format",
-    body: "Import an .xlsx or .csv file with English in column A and Russian in column B. No headers required. Or type your sentences directly using 'Add More Sentences' on the home screen.",
+    title: "Tracking Your Progress",
+    body: "Every answer is recorded. Open My Vocabulary to see accuracy and attempt count for each sentence, colour coded green, gold or red. Sort by lowest accuracy to find your weakest sentences and focus on them.",
   },
 ];
 

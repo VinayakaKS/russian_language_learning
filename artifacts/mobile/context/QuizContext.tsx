@@ -191,10 +191,27 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loadSentences = useCallback(async (pairs: SentencePair[]) => {
-    setAllSentences(pairs);
-    await saveSentences(pairs);
-    const existing = await loadStatsFromStorage();
-    setStatsMap(existing);
+    const existing = stateRef.current.allSentences;
+    const existingMap = new Map(
+      existing.map((s) => [s.english.trim().toLowerCase(), s])
+    );
+
+    const merged = pairs.map((newPair) => {
+      const key = newPair.english.trim().toLowerCase();
+      return existingMap.get(key) ?? newPair;
+    });
+
+    const newKeys = new Set(pairs.map((s) => s.english.trim().toLowerCase()));
+    for (const [key, sentence] of existingMap) {
+      if (!newKeys.has(key)) {
+        merged.push(sentence);
+      }
+    }
+
+    setAllSentences(merged);
+    await saveSentences(merged);
+    const existing_stats = await loadStatsFromStorage();
+    setStatsMap(existing_stats);
   }, []);
 
   const loadFromStorage = useCallback(async (): Promise<boolean> => {

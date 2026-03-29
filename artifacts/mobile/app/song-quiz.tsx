@@ -4,11 +4,11 @@ import {
   ScrollView, Animated, Platform, KeyboardAvoidingView,
 } from "react-native";
 import { Audio } from "expo-av";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
-import songData from "@/assets/data/ya_svoboden.json";
+import { SONGS } from "@/constants/songs";
 
 type Phrase = {
   id: string;
@@ -26,6 +26,9 @@ type AnswerState = "idle" | "correct" | "wrong";
 
 export default function SongQuizScreen() {
   const insets = useSafeAreaInsets();
+  const { songId } = useLocalSearchParams<{ songId: string }>();
+  const songMeta = SONGS.find((s) => s.id === songId) ?? SONGS[0];
+  const songData = (songMeta.dataFile as any)?.default ?? songMeta.dataFile;
   const [roundPhrases] = useState<Phrase[]>(() => {
     const total = songData.phrases.length;
     const maxStart = Math.max(0, total - 10);
@@ -112,7 +115,7 @@ export default function SongQuizScreen() {
       await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
 
       const { sound: newSound } = await Audio.Sound.createAsync(
-        require("@/assets/songs/ya_svoboden.mp3"),
+        songMeta.audioFile,
         { positionMillis: phrase.startMs, shouldPlay: true }
       );
 
@@ -142,7 +145,7 @@ export default function SongQuizScreen() {
     return new Promise(async (resolve) => {
       try {
         const { sound: phraseSound } = await Audio.Sound.createAsync(
-          require("@/assets/songs/ya_svoboden.mp3"),
+          songMeta.audioFile,
           { positionMillis: phrase.startMs, shouldPlay: true }
         );
         setSound(phraseSound);
@@ -207,7 +210,7 @@ export default function SongQuizScreen() {
     return () => {
       if (sound) sound.unloadAsync();
     };
-  }, [sound]);
+  }, [sound, songMeta.audioFile]);
 
   useEffect(() => {
     generateOptions(currentPhrase);
@@ -436,8 +439,8 @@ export default function SongQuizScreen() {
             <Ionicons name="close" size={20} color={Colors.textMuted} />
           </TouchableOpacity>
           <View style={styles.songInfo}>
-            <Text style={styles.songTitle}>{songData.title}</Text>
-            <Text style={styles.songArtist}>{songData.artist}</Text>
+            <Text style={styles.songTitle}>{songMeta.titleRussian}</Text>
+            <Text style={styles.songArtist}>{songMeta.artist}</Text>
           </View>
           <Text style={styles.counter}>{currentIndex + 1} / {totalPhrases}</Text>
         </View>

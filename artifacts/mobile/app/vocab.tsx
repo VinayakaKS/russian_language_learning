@@ -10,6 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -17,18 +18,40 @@ import { useQuiz } from "@/context/QuizContext";
 import { SentencePair } from "@/models/SentencePair";
 import { SentenceStats, defaultStats } from "@/models/SentenceStats";
 
+type SortMode = "highAccuracy" | "lowAccuracy";
+
 export default function VocabScreen() {
   const { allSentences, statsMap, deleteSentence } = useQuiz();
   const [search, setSearch] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("highAccuracy");
   const insets = useSafeAreaInsets();
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return allSentences;
-    return allSentences.filter(
+    let result =
+      !q
+        ? [...allSentences]
+        : allSentences.filter(
       (p) => p.english.toLowerCase().includes(q) || p.russian.toLowerCase().includes(q)
     );
-  }, [allSentences, search]);
+
+    result.sort((a, b) => {
+      const sa = statsMap[a.english] ?? defaultStats();
+      const sb = statsMap[b.english] ?? defaultStats();
+      const totalA = sa.timesCorrect + sa.timesWrong;
+      const totalB = sb.timesCorrect + sb.timesWrong;
+
+      if (totalA === 0 && totalB === 0) return 0;
+      if (totalA === 0 && totalB > 0) return 1;
+      if (totalB === 0 && totalA > 0) return -1;
+
+      const accA = sa.timesCorrect / totalA;
+      const accB = sb.timesCorrect / totalB;
+      return sortMode === "highAccuracy" ? accB - accA : accA - accB;
+    });
+
+    return result;
+  }, [allSentences, search, sortMode, statsMap]);
 
   const handleDelete = (pair: SentencePair) => {
     Alert.alert(
@@ -78,7 +101,23 @@ export default function VocabScreen() {
           clearButtonMode="while-editing"
           autoCapitalize="none"
         />
+
+        <TouchableOpacity
+          style={styles.sortBtn}
+          onPress={() => setSortMode((prev) => (prev === "highAccuracy" ? "lowAccuracy" : "highAccuracy"))}
+          activeOpacity={0.85}
+        >
+          <Ionicons
+            name="funnel-outline"
+            size={18}
+            color={sortMode === "highAccuracy" ? Colors.correctGreen : Colors.wrongRed}
+          />
+        </TouchableOpacity>
       </View>
+
+      <Text style={styles.sortLabel}>
+        {sortMode === "highAccuracy" ? "Highest accuracy first" : "Lowest accuracy first"}
+      </Text>
 
       {allSentences.length === 0 ? (
         <View style={styles.emptyState}>
@@ -119,7 +158,7 @@ export default function VocabScreen() {
                     <Text style={styles.russianText}>{pair.russian}</Text>
 
                     <View style={styles.statsRow}>
-                      {accuracy !== null ? (
+                      {total > 0 ? (
                         <>
                           <View style={[styles.badge, { backgroundColor: accuracyColor + "22" }]}>
                             <Text style={[styles.badgeText, { color: accuracyColor }]}>
@@ -129,8 +168,8 @@ export default function VocabScreen() {
                           <Text style={styles.attemptsText}>{total} attempt{total !== 1 ? "s" : ""}</Text>
                         </>
                       ) : (
-                        <View style={styles.badge}>
-                          <Text style={styles.badgeText}>Not studied yet</Text>
+                        <View style={[styles.badge, { backgroundColor: Colors.textMuted + "15" }]}> 
+                          <Text style={[styles.badgeText, { color: Colors.textMuted }]}>Not studied yet</Text>
                         </View>
                       )}
                     </View>
@@ -186,10 +225,13 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   searchRow: {
+    flexDirection: "row",
+    gap: 10,
     paddingHorizontal: 24,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   searchInput: {
+    flex: 1,
     backgroundColor: Colors.navyCard,
     borderRadius: 14,
     paddingHorizontal: 16,
@@ -199,6 +241,24 @@ const styles = StyleSheet.create({
     color: Colors.white,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
+  },
+  sortBtn: {
+    width: 46,
+    height: 46,
+    backgroundColor: Colors.navyCard,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sortLabel: {
+    fontSize: 11,
+    color: Colors.textMuted,
+    textAlign: "right",
+    paddingHorizontal: 24,
+    marginBottom: 8,
+    fontFamily: "Inter_400Regular",
   },
   scroll: { flex: 1 },
   scrollContent: {

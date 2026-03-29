@@ -25,7 +25,11 @@ async function parseCSV(uri: string): Promise<SentencePair[]> {
   for (const line of lines) {
     const cols = parseCSVLine(line);
     if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
-      pairs.push({ english: cols[0].trim(), russian: cols[1].trim() });
+      pairs.push({
+        english: cols[0].trim(),
+        russian: cols[1].trim(),
+        scenario: cols[2]?.trim() || undefined,
+      });
     }
   }
   return pairs;
@@ -79,7 +83,11 @@ async function parseXLSX(uri: string): Promise<SentencePair[]> {
   const pairs: SentencePair[] = [];
   for (const row of rows) {
     if (row.length >= 2 && row[0]?.trim() && row[1]?.trim()) {
-      pairs.push({ english: row[0].trim(), russian: row[1].trim() });
+      pairs.push({
+        english: row[0].trim(),
+        russian: row[1].trim(),
+        scenario: row[2]?.trim() || undefined,
+      });
     }
   }
   return pairs;

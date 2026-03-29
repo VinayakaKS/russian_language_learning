@@ -138,19 +138,6 @@ export default function UploadScreen() {
         </TouchableOpacity>
       )}
 
-      <View style={styles.orDivider}>
-        <View style={styles.orLine} />
-        <Text style={styles.orText}>or</Text>
-        <View style={styles.orLine} />
-      </View>
-
-      <TouchableOpacity
-        style={styles.manualBtn}
-        onPress={() => router.push("/manual-entry")}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.manualBtnText}>Type Sentences Manually</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -299,34 +286,5 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: "Inter_700Bold",
     color: Colors.white,
-  },
-  orDivider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginVertical: 20,
-  },
-  orLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
-  },
-  orText: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-  },
-  manualBtn: {
-    borderWidth: 1,
-    borderColor: "rgba(41, 82, 255, 0.35)",
-    backgroundColor: "rgba(41, 82, 255, 0.07)",
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  manualBtnText: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.accentBlue,
   },
 });
