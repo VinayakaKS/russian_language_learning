@@ -96,6 +96,7 @@ export default function HomeScreen() {
             <ActionTile label="My Vocabulary" icon="list-outline" onPress={() => router.push("/vocab")} />
             <ActionTile label="Add Sentences" icon="add-circle-outline" onPress={() => router.push("/manual-entry")} />
             <ActionTile label="Import File" icon="cloud-upload-outline" onPress={() => router.push("/upload")} />
+            <ActionTile label="Song Mode" icon="musical-notes-outline" onPress={() => router.push("/song-quiz")} />
           </View>
         </>
       ) : (

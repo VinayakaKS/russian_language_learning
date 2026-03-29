@@ -1,0 +1,273 @@
+{
+  "id": "ya_svoboden",
+  "title": "Я Свободен",
+  "artist": "Кипелов",
+  "audioFile": "ya_svoboden.mp3",
+  "difficulty": "intermediate",
+  "phrases": [
+    {
+      "id": "p01",
+      "index": 0,
+      "russian": "Надо мною тишина",
+      "english": "There is silence above me,",
+      "startMs": 56000,
+      "endMs": 60000,
+      "isChorus": false,
+      "blankWord": "тишина",
+      "blankWordTranslation": "Silence"
+    },
+    {
+      "id": "p02",
+      "index": 1,
+      "russian": "Небо, полное дождя",
+      "english": "A sky full of rain,",
+      "startMs": 60200,
+      "endMs": 64000,
+      "isChorus": false,
+      "blankWord": "полное",
+      "blankWordTranslation": "Full"
+    },
+    {
+      "id": "p03",
+      "index": 2,
+      "russian": "Дождь проходит сквозь меня",
+      "english": "The rain passes through me,",
+      "startMs": 63500,
+      "endMs": 66700,
+      "isChorus": false,
+      "blankWord": "меня",
+      "blankWordTranslation": "menya"
+    },
+    {
+      "id": "p04",
+      "index": 3,
+      "russian": "Но боли больше нет",
+      "english": "But the pain is gone.",
+      "startMs": 66800,
+      "endMs": 70000,
+      "isChorus": false,
+      "blankWord": "боли",
+      "blankWordTranslation": "aches and pains"
+    },
+    {
+      "id": "p05",
+      "index": 4,
+      "russian": "Под холодный шёпот звёзд",
+      "english": "Under the cold whisper of the stars",
+      "startMs": 70200,
+      "endMs": 73600,
+      "isChorus": false,
+      "blankWord": "шёпот",
+      "blankWordTranslation": "Whispering"
+    },
+    {
+      "id": "p06",
+      "index": 5,
+      "russian": "Мы сожгли последний мост",
+      "english": "We burned the last bridge,",
+      "startMs": 73600,
+      "endMs": 77000,
+      "isChorus": false,
+      "blankWord": "сожгли",
+      "blankWordTranslation": "burned"
+    },
+    {
+      "id": "p07",
+      "index": 6,
+      "russian": "И всё в бездну сорвалось",
+      "english": "And everything fell into the abyss",
+      "startMs": 76700,
+      "endMs": 80200,
+      "isChorus": false,
+      "blankWord": "бездну",
+      "blankWordTranslation": "abyss"
+    },
+    {
+      "id": "p08",
+      "index": 7,
+      "russian": "Свободным стану я",
+      "english": "I will be free",
+      "startMs": 80000,
+      "endMs": 82500,
+      "isChorus": true,
+      "blankWord": "Свободным",
+      "blankWordTranslation": "• Given freely"
+    },
+    {
+      "id": "p09",
+      "index": 8,
+      "russian": "От зла и от добра",
+      "english": "From evil and from good,",
+      "startMs": 82600,
+      "endMs": 86000,
+      "isChorus": false,
+      "blankWord": "добра",
+      "blankWordTranslation": "Dobra"
+    },
+    {
+      "id": "p10",
+      "index": 9,
+      "russian": "Моя душа была на лезвии ножа",
+      "english": "My soul was on the blade of a knife…",
+      "startMs": 86100,
+      "endMs": 92000,
+      "isChorus": false,
+      "blankWord": "была",
+      "blankWordTranslation": "starting"
+    },
+    {
+      "id": "p11",
+      "index": 10,
+      "russian": "Я бы мог с тобою быть",
+      "english": "I could be with you,",
+      "startMs": 103000,
+      "endMs": 106900,
+      "isChorus": false,
+      "blankWord": "быть",
+      "blankWordTranslation": "to be"
+    },
+    {
+      "id": "p12",
+      "index": 11,
+      "russian": "Я бы мог про всё забыть",
+      "english": "I could forget about everything",
+      "startMs": 106900,
+      "endMs": 110200,
+      "isChorus": false,
+      "blankWord": "забыть",
+      "blankWordTranslation": "forget"
+    },
+    {
+      "id": "p13",
+      "index": 12,
+      "russian": "Я бы мог тебя любить",
+      "english": "I could love you,",
+      "startMs": 110300,
+      "endMs": 113800,
+      "isChorus": false,
+      "blankWord": "любить",
+      "blankWordTranslation": "love"
+    },
+    {
+      "id": "p14",
+      "index": 13,
+      "russian": "Но это лишь игра",
+      "english": "But it's just a game.",
+      "startMs": 113400,
+      "endMs": 116000,
+      "isChorus": false,
+      "blankWord": "игра",
+      "blankWordTranslation": "сыграть"
+    },
+    {
+      "id": "p15",
+      "index": 14,
+      "russian": "В шуме ветра за спиной",
+      "english": "In the noise of the wind behind you",
+      "startMs": 116000,
+      "endMs": 120000,
+      "isChorus": false,
+      "blankWord": "шуме",
+      "blankWordTranslation": "noise"
+    },
+    {
+      "id": "p16",
+      "index": 15,
+      "russian": "Я забуду голос твой",
+      "english": "I'll forget your voice",
+      "startMs": 120100,
+      "endMs": 123800,
+      "isChorus": false,
+      "blankWord": "голос",
+      "blankWordTranslation": "vote"
+    },
+    {
+      "id": "p17",
+      "index": 16,
+      "russian": "И о той любви земной",
+      "english": "And about that earthly love,",
+      "startMs": 123700,
+      "endMs": 126700,
+      "isChorus": false,
+      "blankWord": "земной",
+      "blankWordTranslation": "terrestrial"
+    },
+    {
+      "id": "p18",
+      "index": 17,
+      "russian": "Что нас сжигала в прах",
+      "english": "That burned us to ashes,",
+      "startMs": 126500,
+      "endMs": 130000,
+      "isChorus": false,
+      "blankWord": "сжигала",
+      "blankWordTranslation": "burned"
+    },
+    {
+      "id": "p19",
+      "index": 18,
+      "russian": "И я сходил с ума",
+      "english": "And I was going crazy...",
+      "startMs": 130000,
+      "endMs": 133000,
+      "isChorus": false,
+      "blankWord": "сходил",
+      "blankWordTranslation": "went"
+    },
+    {
+      "id": "p20",
+      "index": 19,
+      "russian": "В моей душе нет больше места для тебя",
+      "english": "There is no more room in my soul for you!",
+      "startMs": 132750,
+      "endMs": 138500,
+      "isChorus": false,
+      "blankWord": "больше",
+      "blankWordTranslation": "greater"
+    },
+    {
+      "id": "p21",
+      "index": 20,
+      "russian": "Я свободен, словно птица в небесах",
+      "english": "I am free, like a bird in the sky,",
+      "startMs": 138600,
+      "endMs": 145000,
+      "isChorus": true,
+      "blankWord": "словно",
+      "blankWordTranslation": "словно"
+    },
+    {
+      "id": "p22",
+      "index": 21,
+      "russian": "Я свободен, я забыл, что значит страх",
+      "english": "I am free, I have forgotten what fear means.",
+      "startMs": 145100,
+      "endMs": 152300,
+      "isChorus": true,
+      "blankWord": "страх",
+      "blankWordTranslation": "fear"
+    },
+    {
+      "id": "p23",
+      "index": 22,
+      "russian": "Я свободен с диким ветром наравне",
+      "english": "I am free with the wild wind on a par,",
+      "startMs": 152200,
+      "endMs": 158600,
+      "isChorus": true,
+      "blankWord": "диким",
+      "blankWordTranslation": "wild"
+    },
+    {
+      "id": "p24",
+      "index": 23,
+      "russian": "Я свободен наяву, а не во сне",
+      "english": "I am free in reality, not in a dream!",
+      "startMs": 158650,
+      "endMs": 166000,
+      "isChorus": true,
+      "blankWord": "наяву",
+      "blankWordTranslation": "in reality"
+    }
+  ]
+}

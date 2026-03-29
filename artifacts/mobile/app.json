@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Russian Lingua",
-    "slug": "russian-lingua",
+    "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -26,14 +26,16 @@
     "web": {
       "favicon": "./assets/images/icon.png"
     },
-  "plugins": [
-  [
-    "expo-font",
-    {
-      "fonts": ["node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"]
-    }
-  ]
-],
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"
+          ]
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
@@ -42,6 +44,7 @@
       "eas": {
         "projectId": "5180b6ea-cef6-472c-8d64-8896bd1ba63c"
       }
-    }
+    },
+    "owner": "vinayakaksgupta"
   }
 }
